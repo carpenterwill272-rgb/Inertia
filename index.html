@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0e1512">
     <link rel="manifest" href="manifest.json">
-    <title>Inertia</title>
+    <title>Ignition</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -25,9 +25,23 @@
             display: flex; align-items: center; justify-content: space-between;
             padding: 14px 20px;
         }
+        .topbar-brand-group {
+            display: flex; align-items: baseline; gap: 8px;
+            min-width: 0; overflow: hidden;
+        }
         .topbar-brand {
-            font-size: 14px; font-weight: 500; color: #d4ddd6;
+            font-size: 14px; font-weight: 600; color: #d4903a;
             letter-spacing: 0.2em; text-transform: uppercase;
+            flex-shrink: 0;
+        }
+        .topbar-sep { color: #2d4a3a; font-size: 12px; flex-shrink: 0; }
+        .topbar-tagline {
+            font-size: 11px; color: #5a8a6e; font-style: italic;
+            letter-spacing: 0.02em;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        @media (max-width: 380px) {
+            .topbar-tagline, .topbar-sep { display: none; }
         }
         .hamburger {
             background: none; border: none; cursor: pointer;
@@ -72,6 +86,16 @@
             margin-top: auto; padding-top: 20px; border-top: 1px solid #1c2a1f;
             font-size: 11px; color: #3a5040; line-height: 1.6;
         }
+        .footer-quote {
+            font-size: 12px; color: #b5c5b9; font-style: italic;
+            line-height: 1.5; margin-bottom: 14px;
+            padding-left: 10px; border-left: 2px solid #2d4a3a;
+        }
+        .footer-stats {
+            font-size: 11px; color: #5a8a6e; margin-bottom: 4px;
+            letter-spacing: 0.02em;
+        }
+        .footer-since { font-size: 10px; color: #3a5040; }
 
         /* ── VIEWS ── */
         .view { display: none; }
@@ -103,9 +127,9 @@
 
         /* ── START CARD ── */
         .start-card {
-            background: linear-gradient(135deg, #162219 0%, #111916 100%);
+            background: linear-gradient(135deg, #1a1e16 0%, #111916 100%);
             border: 1.5px solid #2d4a3a;
-            border-left: 4px solid #5a8a6e;
+            border-left: 4px solid #d4903a;
             border-radius: 12px;
             padding: 22px 22px 20px;
             margin-bottom: 24px;
@@ -114,7 +138,7 @@
         }
         .start-when {
             font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
-            text-transform: uppercase; color: #5a8a6e; margin-bottom: 8px;
+            text-transform: uppercase; color: #d4903a; margin-bottom: 8px;
         }
         .start-title {
             font-size: 19px; font-weight: 600; color: #e8f0e9;
@@ -127,14 +151,14 @@
         .start-btn {
             padding: 12px 28px; font-size: 14px; font-weight: 600;
             font-family: 'Inter', system-ui, sans-serif;
-            background: #5a8a6e; color: #0e1512;
+            background: #d4903a; color: #0e1512;
             border: none; border-radius: 8px; cursor: pointer;
             transition: all 0.15s;
         }
         .start-btn:hover {
-            background: #6a9e82;
+            background: #e0a046;
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(90,138,110,0.3);
+            box-shadow: 0 4px 16px rgba(212,144,58,0.4);
         }
 
         /* ── QUICK ADD ── */
@@ -283,9 +307,9 @@
             border-left: 3px solid #5a8a6e;
         }
         .task-card:hover { background: #151e16; box-shadow: 0 4px 16px rgba(0,0,0,0.25); }
-        .task-card.priority-high   { border-left-color: #6a9e82; }
-        .task-card.priority-medium { border-left-color: #5a8a6e; }
-        .task-card.priority-low    { border-left-color: #2d6a4f; }
+        .task-card.priority-high   { border-left-color: #8b5e1a; }
+        .task-card.priority-medium { border-left-color: #b07a28; }
+        .task-card.priority-low    { border-left-color: #d4a866; }
         .task-card.completed       { opacity: 0.4; border-left-color: #1c2a1f; }
         .task-card.completed .task-title { text-decoration: line-through; }
 
@@ -298,12 +322,40 @@
             font-family: 'Inter', system-ui, sans-serif; transition: color 0.2s;
         }
         .task-btn:hover { color: #5a8a6e; }
-        .task-btn.focus:hover { color: #6a9e82; }
+        .task-btn.focus { color: #8b6a28; }
+        .task-btn.focus:hover { color: #d4903a; }
 
         .task-first-action {
             font-size: 12px; color: #3a5040; margin-bottom: 8px;
             padding-left: 10px; border-left: 2px solid #1c2a1f;
             cursor: pointer;
+        }
+        .task-start-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 8px 12px; font-size: 13px; font-weight: 500;
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #1a1612; color: #d4a866;
+            border: 1px solid #3a2d18; border-radius: 6px;
+            cursor: pointer; margin-bottom: 10px;
+            transition: all 0.15s; text-align: left;
+            max-width: 100%;
+        }
+        .task-start-btn:hover {
+            background: #241d14; color: #e0a046;
+            border-color: #8b5e1a;
+            box-shadow: 0 2px 8px rgba(212,144,58,0.15);
+        }
+        .task-start-btn .tsb-arrow {
+            color: #8b5e1a; font-size: 13px; flex-shrink: 0;
+        }
+        .task-start-btn:hover .tsb-arrow { color: #d4903a; }
+        .task-start-btn .tsb-prefix {
+            color: #8b6a28; font-weight: 700;
+            letter-spacing: 0.08em; font-size: 10px;
+            text-transform: uppercase; flex-shrink: 0;
+        }
+        .task-start-btn .tsb-label {
+            color: inherit; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
         .task-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
         .meta-tag {
@@ -312,7 +364,7 @@
         }
         .meta-scheduled        { background: #141e15; color: #5a8a6e; }
         .meta-deadline         { background: #141e15; color: #4a6355; }
-        .meta-deadline.urgent  { background: #211a08; color: #e9a84c; }
+        .meta-deadline.urgent  { background: #211a08; color: #d4903a; }
         .meta-deadline.overdue { background: #200d0d; color: #c0392b; }
         .meta-category         { background: #141e15; color: #4a6355; }
         .meta-context          { background: #141e15; color: #4a6355; }
@@ -523,8 +575,12 @@
         .start-close:hover { color: #d4ddd6; }
         .start-eyebrow {
             font-size: 11px; font-weight: 600; letter-spacing: 0.16em;
-            text-transform: uppercase; color: #5a8a6e; margin-bottom: 18px;
+            text-transform: uppercase; color: #d4903a; margin-bottom: 18px;
         }
+        #startNowBtn {
+            background: #d4903a; color: #0e1512;
+        }
+        #startNowBtn:hover { background: #e0a046; }
         .start-ov-title {
             font-size: 28px; font-weight: 500; color: #e8f0e9;
             line-height: 1.25; margin-bottom: 10px;
@@ -555,10 +611,18 @@
         }
         .delay-panel .chip-group { justify-content: center; margin-bottom: 14px; }
         .delay-nudge {
-            font-size: 12px; color: #e9a84c;
+            font-size: 12px; color: #d4903a;
             margin-bottom: 10px; font-style: italic;
         }
         .delay-nudge:empty { display: none; }
+
+        .reflection-panel {
+            max-width: 380px; margin: 0 auto 20px;
+            background: #111916; border: 1.5px solid #1c2a1f;
+            border-radius: 10px; padding: 20px;
+            text-align: left;
+        }
+        .reflection-panel .chip-group { justify-content: flex-start; margin-bottom: 0; }
 
         /* ── ONBOARDING ── */
         .onboarding {
@@ -604,6 +668,7 @@
         .sub-step.visible { display: block; animation: fadeSlide 0.2s; }
 
         .meta-repeat { background: #1e1a2a; color: #8b7fd8; }
+        .meta-delay  { background: #2a1f0a; color: #d4903a; }
 
         /* ── HABITS VIEW ── */
         .habit-card {
@@ -751,9 +816,9 @@
         .sched-task:hover {
             background: #264836; border-color: #5a8a6e;
         }
-        .sched-task.priority-high   { border-left-color: #6a9e82; }
-        .sched-task.priority-medium { border-left-color: #5a8a6e; }
-        .sched-task.priority-low    { border-left-color: #2d6a4f; }
+        .sched-task.priority-high   { border-left-color: #8b5e1a; }
+        .sched-task.priority-medium { border-left-color: #b07a28; }
+        .sched-task.priority-low    { border-left-color: #d4a866; }
         .sched-task.completed       { opacity: 0.45; }
         .sched-task.completed .st-title { text-decoration: line-through; }
         .st-time  { font-size: 10px; color: #6b8f74; margin-bottom: 2px; }
@@ -762,13 +827,13 @@
 
         .now-line {
             position: absolute; left: 0; right: 0; height: 0;
-            border-top: 1.5px solid #e9a84c; z-index: 3;
+            border-top: 1.5px solid #d4903a; z-index: 3;
             pointer-events: none;
         }
         .now-line::before {
             content: ''; position: absolute; left: -4px; top: -4px;
             width: 8px; height: 8px; border-radius: 50%;
-            background: #e9a84c;
+            background: #d4903a;
         }
 
         /* Unscheduled tasks */
@@ -829,8 +894,8 @@
             white-space: nowrap;
             border-left: 2px solid #5a8a6e;
         }
-        .month-task.priority-high { border-left-color: #6a9e82; }
-        .month-task.priority-low  { border-left-color: #2d6a4f; }
+        .month-task.priority-high { border-left-color: #8b5e1a; }
+        .month-task.priority-low  { border-left-color: #d4a866; }
         .month-task.completed { opacity: 0.45; text-decoration: line-through; }
         .month-more {
             font-size: 9px; color: #6b8f74;
@@ -851,7 +916,11 @@
 
 <!-- TOP BAR -->
 <div class="topbar">
-    <div class="topbar-brand">Inertia</div>
+    <div class="topbar-brand-group">
+        <span class="topbar-brand">Ignition</span>
+        <span class="topbar-sep">·</span>
+        <span class="topbar-tagline">Start before you're ready</span>
+    </div>
     <button class="hamburger" id="hamburger" aria-label="Menu">
         <span></span><span></span><span></span>
     </button>
@@ -865,10 +934,11 @@
     <button class="menu-item" data-view="habits">Habits</button>
     <button class="menu-item" data-view="ready">Ready to Work</button>
     <button class="menu-item" data-view="stats">Progress</button>
-    <button class="menu-item" data-view="science">Why Inertia Works</button>
+    <button class="menu-item" data-view="science">Why Ignition Works</button>
     <div class="menu-footer">
-        <div>Visits: <span id="visitCount">0</span></div>
-        <div style="margin-top:4px">Member since <span id="memberSince"></span></div>
+        <div class="footer-quote" id="footerQuote"></div>
+        <div class="footer-stats" id="footerStats"></div>
+        <div class="footer-since">Member since <span id="memberSince"></span></div>
         <button class="link-btn" id="editProfileBtn">Update preferences</button>
     </div>
 </aside>
@@ -1090,12 +1160,12 @@
 <!-- ═══ SCIENCE VIEW ═══ -->
 <section class="view" id="view-science">
     <div class="header">
-        <h1>Why Inertia Works</h1>
+        <h1>Why Ignition Works</h1>
         <p>Each feature mapped to peer-reviewed research</p>
     </div>
     <div class="science-intro">
         <p>Procrastination isn't a character flaw — it's a predictable response to specific conditions your brain finds aversive. Vague goals, distant rewards, and overwhelming tasks all trigger avoidance.</p>
-        <p><strong>Inertia is built around findings from behavioural psychology, cognitive science, and habit research</strong> — not gamification tricks. Every field in the task flow exists because a peer-reviewed study shows it meaningfully increases follow-through.</p>
+        <p><strong>Ignition is built around findings from behavioural psychology, cognitive science, and habit research</strong> — not gamification tricks. Every field in the task flow exists because a peer-reviewed study shows it meaningfully increases follow-through.</p>
         <p>Tap any feature below to see the research it's based on.</p>
     </div>
     <div id="featureList"></div>
@@ -1130,6 +1200,30 @@
             <button class="btn-secondary" id="startDoneForNowBtn">Done for now</button>
         </div>
 
+        <div class="reflection-panel" id="reflectionPanel" style="display:none">
+            <div class="step-label" style="margin-bottom:10px">How did it go?</div>
+            <div class="chip-group" id="reflectQuality">
+                <button type="button" class="chip" data-value="rough">Rough</button>
+                <button type="button" class="chip" data-value="ok">OK</button>
+                <button type="button" class="chip" data-value="good">Good</button>
+                <button type="button" class="chip" data-value="great">Great</button>
+            </div>
+            <div class="step-label" style="margin:16px 0 10px">Any distractions?</div>
+            <div class="chip-group" id="reflectDistractions">
+                <button type="button" class="chip" data-value="none">None</button>
+                <button type="button" class="chip" data-value="Phone">Phone</button>
+                <button type="button" class="chip" data-value="Social media">Social media</button>
+                <button type="button" class="chip" data-value="Noise">Noise</button>
+                <button type="button" class="chip" data-value="People">People</button>
+                <button type="button" class="chip" data-value="Other thoughts">Other thoughts</button>
+            </div>
+            <input class="chip-custom" id="reflectCustom" type="text" placeholder="Something else...">
+            <div class="start-button-row" style="margin-top:12px">
+                <button class="btn-big" id="reflectContinueBtn">Continue</button>
+                <button class="btn-secondary" id="reflectSkipBtn">Skip</button>
+            </div>
+        </div>
+
         <div class="start-button-row" id="startCompleteButtons" style="display:none">
             <button class="btn-big" id="startMarkDoneBtn">Mark task complete</button>
             <button class="btn-secondary" id="startKeepActiveBtn">Keep it active</button>
@@ -1143,7 +1237,7 @@
                 <button type="button" class="chip" data-delay="60">1 hour</button>
                 <button type="button" class="chip" data-delay="1440">Tomorrow</button>
             </div>
-            <div class="delay-nudge" id="delayNudge"></div>
+            <div class="delay-nudge" id="delayIgnition"></div>
             <button class="btn-secondary" id="delayCancelBtn" style="margin-top:10px">Never mind</button>
         </div>
     </div>
@@ -1153,9 +1247,9 @@
 <div class="onboarding" id="onboarding">
     <div class="onb-inner">
         <div class="onb-step active" data-onb="welcome">
-            <div class="onb-eyebrow">Inertia</div>
+            <div class="onb-eyebrow">Ignition</div>
             <h2>Let's beat procrastination.</h2>
-            <p>Inertia is built on behavioural science. Every feature is designed to help you start, stay focused, and finish.</p>
+            <p>Ignition is built on behavioural science. Every feature is designed to help you start, stay focused, and finish.</p>
             <p class="onb-sub">First, a few questions so the app fits how you actually work. You can change these any time.</p>
             <button class="btn-big" data-go="location">Begin</button>
         </div>
@@ -1454,7 +1548,34 @@
         hamburger.classList.toggle('open', o);
     }
 
-    hamburger.addEventListener('click', () => toggleMenu());
+    const FOOTER_QUOTES = [
+        "Starting is the hardest part.",
+        "Momentum beats motivation.",
+        "Two minutes changes the trajectory.",
+        "Small steps compound.",
+        "Progress over perfection.",
+        "Tomorrow's you is thanking you.",
+        "Done beats perfect.",
+        "Showing up is half the work.",
+        "Every start is a win.",
+        "Forward, not perfect.",
+        "You're building the habit.",
+        "Motivation follows action.",
+        "The work rewards the worker.",
+        "Discipline is freedom.",
+        "One task at a time.",
+    ];
+
+    function updateMenuFooter() {
+        document.getElementById('footerQuote').textContent =
+            FOOTER_QUOTES[Math.floor(Math.random() * FOOTER_QUOTES.length)];
+        const completed = state.tasks.filter(t => t.status === 'completed').length;
+        const focusMin  = state.focusSessions.reduce((a,s) => a + (s.minutes || 0), 0);
+        document.getElementById('footerStats').textContent =
+            completed + ' task' + (completed === 1 ? '' : 's') + ' completed · ' + focusMin + ' focus min';
+    }
+
+    hamburger.addEventListener('click', () => { updateMenuFooter(); toggleMenu(); });
     menuBackdrop.addEventListener('click', () => toggleMenu(false));
 
     function switchView(name) {
@@ -1944,12 +2065,6 @@
             ttl.addEventListener('click', () => toggleComplete(task.id));
 
             const acts = document.createElement('div'); acts.className = 'task-actions';
-            if (task.status !== 'completed') {
-                const focusBtn = document.createElement('button');
-                focusBtn.className = 'task-btn focus'; focusBtn.textContent = 'Focus';
-                focusBtn.addEventListener('click', e => { e.stopPropagation(); openStartOverlay(task.id); });
-                acts.appendChild(focusBtn);
-            }
             const edt = document.createElement('button');
             edt.className = 'task-btn'; edt.textContent = 'Edit';
             edt.addEventListener('click', e => { e.stopPropagation(); openForm(task); });
@@ -1957,12 +2072,15 @@
 
             hdr.appendChild(ttl); hdr.appendChild(acts); li.appendChild(hdr);
 
-            if (task.firstAction) {
-                const a = document.createElement('div');
-                a.className = 'task-first-action';
-                a.textContent = '→ ' + task.firstAction;
-                a.addEventListener('click', () => toggleComplete(task.id));
-                li.appendChild(a);
+            if (task.status !== 'completed') {
+                const sbtn = document.createElement('button');
+                sbtn.className = 'task-start-btn';
+                sbtn.innerHTML =
+                    '<span class="tsb-arrow">▸</span>' +
+                    '<span class="tsb-prefix">Start</span>' +
+                    '<span class="tsb-label">' + escapeHtml(task.firstAction || 'Begin this task') + '</span>';
+                sbtn.addEventListener('click', e => { e.stopPropagation(); openStartOverlay(task.id); });
+                li.appendChild(sbtn);
             }
 
             const meta = document.createElement('div'); meta.className = 'task-meta';
@@ -1973,6 +2091,11 @@
             if (task.category) { const t=document.createElement('span'); t.className='meta-tag meta-category'; t.textContent=task.category; meta.appendChild(t); }
             if (task.location) { const t=document.createElement('span'); t.className='meta-tag meta-context'; t.textContent='📍 '+task.location; meta.appendChild(t); }
             if (task.obstacle) { const t=document.createElement('span'); t.className='meta-tag meta-context'; t.textContent='⚠️ '+task.obstacle; meta.appendChild(t); }
+            if ((task.delayCount||0) >= 2 && task.status !== 'completed') {
+                const t=document.createElement('span'); t.className='meta-tag meta-delay';
+                t.textContent='↺ delayed ' + task.delayCount + '×';
+                meta.appendChild(t);
+            }
             li.appendChild(meta);
 
             taskList.appendChild(li);
@@ -2063,9 +2186,10 @@
 
     const startOv = {
         taskId: null,
-        phase: 'ready',     // 'ready' | 'running2' | 'extend' | 'running25' | 'complete'
+        phase: 'ready',     // 'ready' | 'running2' | 'extend' | 'running25' | 'reflection' | 'complete'
         remaining: 120,
         timer: null,
+        pendingSessionMinutes: 0,
     };
 
     function openStartOverlay(taskId) {
@@ -2101,7 +2225,7 @@
     function updateStartOvUi() {
         const show = id => document.getElementById(id).style.display = '';
         const hide = id => document.getElementById(id).style.display = 'none';
-        ['startMainButtons','startRunButtons','startExtendButtons','startCompleteButtons','delayPanel'].forEach(hide);
+        ['startMainButtons','startRunButtons','startExtendButtons','startCompleteButtons','delayPanel','reflectionPanel'].forEach(hide);
 
         const phase = startOv.phase;
         const label = document.getElementById('startPhaseLabel');
@@ -2125,6 +2249,12 @@
             label.textContent = 'Deep focus · 25 minutes';
             sub.textContent   = 'You\'re in it.';
             show('startRunButtons');
+        } else if (phase === 'reflection') {
+            label.textContent = 'Quick reflection';
+            sub.textContent   = 'Two questions to make the next session better.';
+            document.querySelectorAll('#reflectQuality .chip, #reflectDistractions .chip').forEach(c => c.classList.remove('selected'));
+            document.getElementById('reflectCustom').value = '';
+            show('reflectionPanel');
         } else if (phase === 'complete') {
             label.textContent = 'Session complete';
             sub.textContent   = 'Great work.';
@@ -2139,12 +2269,8 @@
             clearInterval(startOv.timer); startOv.timer = null;
             if (startOv.phase === 'running2') { startOv.phase = 'extend'; updateStartOvUi(); }
             else if (startOv.phase === 'running25') {
-                // Log the focus session
-                state.focusSessions.push({
-                    taskId: startOv.taskId, minutes: 27, at: Date.now()
-                });
-                saveState();
-                startOv.phase = 'complete'; updateStartOvUi();
+                startOv.pendingSessionMinutes = 27;
+                startOv.phase = 'reflection'; updateStartOvUi();
                 if ('Notification' in window && Notification.permission === 'granted') {
                     new Notification('Session complete', { body: 'Take a short break.' });
                 }
@@ -2175,11 +2301,13 @@
     document.getElementById('startStopBtn').addEventListener('click', () => {
         if (startOv.timer) { clearInterval(startOv.timer); startOv.timer = null; }
         const minutesDone = startOv.phase === 'running2' ? 2 - Math.ceil(startOv.remaining/60) : 27 - Math.ceil(startOv.remaining/60);
-        if (minutesDone > 0) {
-            state.focusSessions.push({ taskId: startOv.taskId, minutes: minutesDone, at: Date.now() });
-            saveState();
+        startOv.pendingSessionMinutes = Math.max(0, minutesDone);
+        if (startOv.pendingSessionMinutes > 0) {
+            startOv.phase = 'reflection';
+        } else {
+            startOv.phase = 'complete';
         }
-        startOv.phase = 'complete'; updateStartOvUi();
+        updateStartOvUi();
     });
 
     document.getElementById('startKeepGoingBtn').addEventListener('click', () => {
@@ -2194,9 +2322,8 @@
     });
 
     document.getElementById('startDoneForNowBtn').addEventListener('click', () => {
-        state.focusSessions.push({ taskId: startOv.taskId, minutes: 2, at: Date.now() });
-        saveState();
-        startOv.phase = 'complete'; updateStartOvUi();
+        startOv.pendingSessionMinutes = 2;
+        startOv.phase = 'reflection'; updateStartOvUi();
     });
 
     document.getElementById('startMarkDoneBtn').addEventListener('click', () => {
@@ -2205,10 +2332,62 @@
     });
     document.getElementById('startKeepActiveBtn').addEventListener('click', closeStartOverlay);
 
+    // Reflection chips — quality is single select, distractions are multi (except "None" which clears)
+    document.getElementById('reflectQuality').addEventListener('click', e => {
+        const chip = e.target.closest('.chip'); if (!chip) return;
+        e.currentTarget.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+        chip.classList.add('selected');
+    });
+    document.getElementById('reflectDistractions').addEventListener('click', e => {
+        const chip = e.target.closest('.chip'); if (!chip) return;
+        const group = e.currentTarget;
+        if (chip.dataset.value === 'none') {
+            group.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+            chip.classList.add('selected');
+        } else {
+            group.querySelector('[data-value="none"]').classList.remove('selected');
+            chip.classList.toggle('selected');
+        }
+    });
+
+    function logSessionWithReflection() {
+        const quality = [...document.querySelectorAll('#reflectQuality .chip.selected')].map(c => c.dataset.value)[0] || '';
+        const distractionChips = [...document.querySelectorAll('#reflectDistractions .chip.selected')]
+            .map(c => c.dataset.value).filter(v => v !== 'none');
+        const custom = document.getElementById('reflectCustom').value.trim();
+        const distractions = [...distractionChips, custom].filter(Boolean).join(', ');
+        const gotDistracted = distractions.length > 0;
+
+        state.focusSessions.push({
+            taskId: startOv.taskId,
+            minutes: startOv.pendingSessionMinutes || 0,
+            at: Date.now(),
+            quality,
+            distracted: gotDistracted,
+            distractions,
+        });
+        saveState();
+    }
+
+    document.getElementById('reflectContinueBtn').addEventListener('click', () => {
+        logSessionWithReflection();
+        startOv.phase = 'complete'; updateStartOvUi();
+    });
+    document.getElementById('reflectSkipBtn').addEventListener('click', () => {
+        // Log session without reflection data
+        state.focusSessions.push({
+            taskId: startOv.taskId,
+            minutes: startOv.pendingSessionMinutes || 0,
+            at: Date.now(),
+        });
+        saveState();
+        startOv.phase = 'complete'; updateStartOvUi();
+    });
+
     // Delay flow
     document.getElementById('startDelayBtn').addEventListener('click', () => {
         const t = state.tasks.find(x => x.id === startOv.taskId);
-        const nudgeEl = document.getElementById('delayNudge');
+        const nudgeEl = document.getElementById('delayIgnition');
         if (t && (t.delayCount || 0) >= 2) {
             nudgeEl.textContent = 'You\'ve delayed this ' + t.delayCount + ' times already. Could you do just 2 minutes?';
         } else {
@@ -2498,6 +2677,9 @@
         const focusMin = state.focusSessions.reduce((a,s) => a + (s.minutes||0), 0);
         grid.appendChild(statCard(focusMin, 'Focus minutes'));
 
+        const totalDelays = tasks.reduce((a,t) => a + (t.delayCount||0), 0);
+        grid.appendChild(statCard(totalDelays, 'Times delayed'));
+
         c.appendChild(grid);
 
         // Overall completion
@@ -2554,8 +2736,43 @@
         c.appendChild(insLabel);
 
         c.appendChild(insight('When you actually get things done', mostProductiveTime(completed), 'Measured from your actual completion times — your real peak, not what you think it is.'));
+
+        // Avoidance insight — the task you've delayed most
+        const delayed = tasks
+            .filter(t => (t.delayCount || 0) > 0)
+            .sort((a,b) => (b.delayCount||0) - (a.delayCount||0));
+        if (delayed.length) {
+            const top = delayed[0];
+            const note = top.status === 'completed'
+                ? 'You delayed this ' + top.delayCount + ' times before finishing.'
+                : 'Delayed ' + top.delayCount + ' times. Maybe the 2-minute rule is the way in.';
+            c.appendChild(insight('Most avoided task', top.title, note));
+        }
         c.appendChild(insight('Most common obstacle', mostCommon(tasks, 'obstacle'), 'The friction that appears most often in your tasks.'));
         c.appendChild(insight('Most common distraction', mostCommon(tasks, 'distraction'), 'What tends to pull your attention.'));
+
+        // Actual distractions reported during focus sessions
+        const distractionCounts = {};
+        state.focusSessions.forEach(s => {
+            (s.distractions || '').split(', ').filter(Boolean).forEach(v => {
+                distractionCounts[v] = (distractionCounts[v] || 0) + 1;
+            });
+        });
+        const sortedDist = Object.entries(distractionCounts).sort((a,b) => b[1] - a[1]);
+        if (sortedDist.length) {
+            c.appendChild(insight('What actually breaks your focus', sortedDist[0][0],
+                'From your post-session reflections — the distraction that actually pulls you, not the one you expect to.'));
+        }
+
+        // Focus quality average
+        const qualitySessions = state.focusSessions.filter(s => s.quality);
+        if (qualitySessions.length >= 2) {
+            const qualityCounts = {};
+            qualitySessions.forEach(s => { qualityCounts[s.quality] = (qualityCounts[s.quality] || 0) + 1; });
+            const mostCommonQuality = Object.entries(qualityCounts).sort((a,b) => b[1] - a[1])[0][0];
+            c.appendChild(insight('Typical focus quality', mostCommonQuality.charAt(0).toUpperCase() + mostCommonQuality.slice(1),
+                'How your focus sessions usually feel afterwards.'));
+        }
         c.appendChild(insight('Category you complete most', bestCategory(tasks), 'You finish these reliably.'));
         c.appendChild(insight('Category you avoid most', worstCategory(tasks), 'These get created but sit on the list.'));
     }
@@ -3164,8 +3381,8 @@
     buildTimeSelects();
 
     document.getElementById('todayDate').textContent = now.toLocaleDateString([], { weekday:'long', month:'long', day:'numeric' });
-    document.getElementById('visitCount').textContent = state.visits;
     document.getElementById('memberSince').textContent = new Date(state.memberSince).toLocaleDateString([], { month: 'short', year: 'numeric' });
+    updateMenuFooter();
 
     renderTasks();
     requestNotificationPermission();
