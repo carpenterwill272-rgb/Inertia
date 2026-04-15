@@ -441,6 +441,233 @@
             color: #d4ddd6; font-size: 13px; cursor: pointer;
             font-family: 'Inter', system-ui, sans-serif;
         }
+        /* ── ONBOARDING ── */
+        .onboarding {
+            display: none; position: fixed; inset: 0; z-index: 100;
+            background: #0e1512;
+            overflow-y: auto; padding: 40px 24px;
+        }
+        .onboarding.active { display: flex; align-items: flex-start; justify-content: center; }
+        .onb-inner {
+            width: 100%; max-width: 460px; padding-top: 40px;
+        }
+        .onb-step { display: none; animation: fadeSlide 0.3s ease; }
+        .onb-step.active { display: block; }
+        .onb-eyebrow {
+            font-size: 11px; font-weight: 600; letter-spacing: 0.14em;
+            text-transform: uppercase; color: #5a8a6e; margin-bottom: 14px;
+        }
+        .onb-step h2 {
+            font-size: 26px; font-weight: 500; color: #d4ddd6;
+            margin-bottom: 14px; line-height: 1.25;
+        }
+        .onb-step p {
+            font-size: 14px; color: #b5c5b9; line-height: 1.6;
+            margin-bottom: 12px;
+        }
+        .onb-sub { color: #6b8f74; font-size: 13px; margin-bottom: 20px; }
+        .onb-step .chip-group { margin-bottom: 14px; }
+        .onb-step .chip-custom { margin-bottom: 24px; }
+        .onb-step .btn-big { margin-top: 16px; }
+
+        .link-btn {
+            margin-top: 12px; padding: 0;
+            background: none; border: none;
+            color: #5a8a6e; font-size: 11px;
+            font-family: 'Inter', system-ui, sans-serif;
+            cursor: pointer; text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .link-btn:hover { color: #6a9e82; }
+
+        /* ── SCHEDULE ── */
+        .schedule-top {
+            margin-bottom: 18px;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .schedule-nav {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 10px;
+        }
+        .schedule-title {
+            font-size: 20px; font-weight: 500; color: #d4ddd6;
+            letter-spacing: 0.02em; text-align: center; flex: 1;
+        }
+        .schedule-actions {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 10px;
+        }
+        .seg {
+            display: flex; background: #111916;
+            border: 1.5px solid #1c2a1f; border-radius: 8px;
+            padding: 3px;
+        }
+        .seg-btn {
+            padding: 6px 14px; font-size: 13px;
+            font-family: 'Inter', system-ui, sans-serif; font-weight: 500;
+            background: transparent; color: #4a6355;
+            border: none; border-radius: 5px; cursor: pointer;
+            transition: all 0.15s;
+        }
+        .seg-btn:hover { color: #d4ddd6; }
+        .seg-btn.active { background: #162219; color: #d4ddd6; }
+
+        /* Day/Week timeline grid */
+        .timeline {
+            background: #111916; border: 1.5px solid #1c2a1f;
+            border-radius: 10px; overflow: hidden;
+        }
+        .timeline-head {
+            display: grid; border-bottom: 1px solid #1c2a1f;
+            background: #0e1512;
+        }
+        .timeline-head-cell {
+            padding: 10px 8px; text-align: center;
+            font-size: 11px; font-weight: 600; color: #6b8f74;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            border-right: 1px solid #1c2a1f;
+        }
+        .timeline-head-cell:last-child { border-right: none; }
+        .timeline-head-cell.today {
+            color: #d4ddd6; background: #162219;
+        }
+        .timeline-head-date {
+            display: block; font-size: 16px; font-weight: 600;
+            color: #d4ddd6; margin-top: 2px; letter-spacing: 0;
+            text-transform: none;
+        }
+        .timeline-body {
+            display: grid; position: relative;
+            max-height: 640px; overflow-y: auto;
+        }
+        .time-col {
+            border-right: 1px solid #1c2a1f;
+            background: #0e1512;
+        }
+        .time-slot {
+            height: 48px; padding: 2px 6px;
+            font-size: 10px; color: #3a5040;
+            border-bottom: 1px solid #162219;
+            display: flex; align-items: flex-start; justify-content: flex-end;
+        }
+        .day-col {
+            border-right: 1px solid #1c2a1f;
+            position: relative;
+        }
+        .day-col:last-child { border-right: none; }
+        .day-col.today { background: #121a14; }
+        .hour-cell {
+            height: 48px; border-bottom: 1px solid #162219;
+            cursor: pointer; transition: background 0.1s;
+        }
+        .hour-cell:hover { background: #162219; }
+        .sched-task {
+            position: absolute; left: 4px; right: 4px;
+            padding: 6px 8px; background: #1e3529;
+            border: 1px solid #2d6a4f; border-left: 3px solid #5a8a6e;
+            border-radius: 5px; cursor: pointer;
+            font-size: 12px; color: #d4ddd6;
+            overflow: hidden; text-overflow: ellipsis;
+            transition: background 0.15s, border-color 0.15s;
+            z-index: 2;
+        }
+        .sched-task:hover {
+            background: #264836; border-color: #5a8a6e;
+        }
+        .sched-task.priority-high   { border-left-color: #6a9e82; }
+        .sched-task.priority-medium { border-left-color: #5a8a6e; }
+        .sched-task.priority-low    { border-left-color: #2d6a4f; }
+        .sched-task.completed       { opacity: 0.45; }
+        .sched-task.completed .st-title { text-decoration: line-through; }
+        .st-time  { font-size: 10px; color: #6b8f74; margin-bottom: 2px; }
+        .st-title { font-weight: 600; line-height: 1.3; }
+        .st-action { font-size: 11px; color: #6b8f74; margin-top: 2px; line-height: 1.2; }
+
+        .now-line {
+            position: absolute; left: 0; right: 0; height: 0;
+            border-top: 1.5px solid #e9a84c; z-index: 3;
+            pointer-events: none;
+        }
+        .now-line::before {
+            content: ''; position: absolute; left: -4px; top: -4px;
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #e9a84c;
+        }
+
+        /* Unscheduled tasks */
+        .unsched-block {
+            background: #111916; border: 1.5px dashed #1c2a1f;
+            border-radius: 8px; padding: 12px 14px; margin-top: 12px;
+        }
+        .unsched-label {
+            font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+            text-transform: uppercase; color: #3a5040; margin-bottom: 8px;
+        }
+        .unsched-list { display: flex; flex-wrap: wrap; gap: 6px; }
+        .unsched-pill {
+            padding: 5px 10px; font-size: 12px;
+            background: #162219; color: #b5c5b9;
+            border: 1px solid #1c2a1f; border-radius: 6px;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .unsched-pill:hover { border-color: #5a8a6e; color: #d4ddd6; }
+        .unsched-pill.completed { opacity: 0.4; text-decoration: line-through; }
+
+        /* Month grid */
+        .month-grid {
+            display: grid; grid-template-columns: repeat(7, 1fr);
+            background: #111916; border: 1.5px solid #1c2a1f;
+            border-radius: 10px; overflow: hidden;
+        }
+        .month-header {
+            padding: 8px; font-size: 10px; font-weight: 600;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            color: #6b8f74; text-align: center;
+            border-bottom: 1px solid #1c2a1f;
+            background: #0e1512;
+        }
+        .month-cell {
+            min-height: 92px; padding: 6px;
+            border-right: 1px solid #162219;
+            border-bottom: 1px solid #162219;
+            cursor: pointer; transition: background 0.15s;
+            display: flex; flex-direction: column; gap: 3px;
+            overflow: hidden;
+        }
+        .month-cell:hover { background: #162219; }
+        .month-cell.other-month { opacity: 0.35; }
+        .month-cell.today { background: #162219; }
+        .month-day-num {
+            font-size: 13px; font-weight: 600; color: #d4ddd6;
+            margin-bottom: 2px;
+        }
+        .month-cell.today .month-day-num {
+            color: #5a8a6e;
+        }
+        .month-task {
+            font-size: 10px; padding: 2px 5px;
+            background: #1e3529; color: #d4ddd6;
+            border-radius: 3px; line-height: 1.3;
+            overflow: hidden; text-overflow: ellipsis;
+            white-space: nowrap;
+            border-left: 2px solid #5a8a6e;
+        }
+        .month-task.priority-high { border-left-color: #6a9e82; }
+        .month-task.priority-low  { border-left-color: #2d6a4f; }
+        .month-task.completed { opacity: 0.45; text-decoration: line-through; }
+        .month-more {
+            font-size: 9px; color: #6b8f74;
+            padding: 1px 5px;
+        }
+
+        @media (max-width: 540px) {
+            .timeline-head-date { font-size: 13px; }
+            .timeline-head-cell { padding: 6px 4px; font-size: 10px; }
+            .time-slot { font-size: 9px; }
+            .month-cell { min-height: 68px; padding: 4px; }
+            .month-day-num { font-size: 11px; }
+            .month-task { font-size: 9px; padding: 1px 3px; }
+        }
     </style>
 </head>
 <body>
@@ -457,12 +684,14 @@
 <div class="menu-backdrop" id="menuBackdrop"></div>
 <aside class="side-menu" id="sideMenu">
     <button class="menu-item active" data-view="home">Home</button>
+    <button class="menu-item" data-view="schedule">Schedule</button>
     <button class="menu-item" data-view="ready">Ready to Work</button>
     <button class="menu-item" data-view="stats">Progress</button>
     <button class="menu-item" data-view="science">Why Inertia Works</button>
     <div class="menu-footer">
         <div>Visits: <span id="visitCount">0</span></div>
         <div style="margin-top:4px">Member since <span id="memberSince"></span></div>
+        <button class="link-btn" id="editProfileBtn">Update preferences</button>
     </div>
 </aside>
 
@@ -594,6 +823,26 @@
     <ul class="task-list" id="taskList"></ul>
 </section>
 
+<!-- ═══ SCHEDULE VIEW ═══ -->
+<section class="view" id="view-schedule">
+    <div class="schedule-top">
+        <div class="schedule-nav">
+            <button class="cal-nav" id="schedPrev">&#8249;</button>
+            <div class="schedule-title" id="schedTitle">—</div>
+            <button class="cal-nav" id="schedNext">&#8250;</button>
+        </div>
+        <div class="schedule-actions">
+            <button class="chip" id="btnToday">Today</button>
+            <div class="seg">
+                <button class="seg-btn active" data-sched="day">Day</button>
+                <button class="seg-btn" data-sched="week">Week</button>
+                <button class="seg-btn" data-sched="month">Month</button>
+            </div>
+        </div>
+    </div>
+    <div id="scheduleBody"></div>
+</section>
+
 <!-- ═══ READY TO WORK VIEW ═══ -->
 <section class="view" id="view-ready">
     <div class="header">
@@ -626,6 +875,84 @@
     <div id="featureList"></div>
 </section>
 
+</div>
+
+<!-- ONBOARDING -->
+<div class="onboarding" id="onboarding">
+    <div class="onb-inner">
+        <div class="onb-step active" data-onb="welcome">
+            <div class="onb-eyebrow">Inertia</div>
+            <h2>Let's beat procrastination.</h2>
+            <p>Inertia is built on behavioural science. Every feature is designed to help you start, stay focused, and finish.</p>
+            <p class="onb-sub">First, a few questions so the app fits how you actually work. You can change these any time.</p>
+            <button class="btn-big" data-go="location">Begin</button>
+        </div>
+
+        <div class="onb-step" data-onb="location">
+            <div class="onb-eyebrow">1 of 4</div>
+            <h2>Where do you do your best work?</h2>
+            <p class="onb-sub">Environment shapes focus more than willpower does.</p>
+            <div class="chip-group" id="onbLocation">
+                <button type="button" class="chip" data-value="My desk">My desk</button>
+                <button type="button" class="chip" data-value="Coffee shop">Coffee shop</button>
+                <button type="button" class="chip" data-value="Library">Library</button>
+                <button type="button" class="chip" data-value="Outside">Outside</button>
+            </div>
+            <input class="chip-custom" id="onbLocationCustom" type="text" placeholder="Somewhere else...">
+            <button class="btn-big" data-go="distraction">Next</button>
+        </div>
+
+        <div class="onb-step" data-onb="distraction">
+            <div class="onb-eyebrow">2 of 4</div>
+            <h2>What usually distracts you?</h2>
+            <p class="onb-sub">Naming distractions in advance reduces their pull. Select all that apply.</p>
+            <div class="chip-group" id="onbDistraction">
+                <button type="button" class="chip" data-value="Phone">Phone</button>
+                <button type="button" class="chip" data-value="Social media">Social media</button>
+                <button type="button" class="chip" data-value="Noise">Noise</button>
+                <button type="button" class="chip" data-value="People">People</button>
+                <button type="button" class="chip" data-value="Other thoughts">Other thoughts</button>
+            </div>
+            <input class="chip-custom" id="onbDistractionCustom" type="text" placeholder="Something else...">
+            <button class="btn-big" data-go="time">Next</button>
+        </div>
+
+        <div class="onb-step" data-onb="time">
+            <div class="onb-eyebrow">3 of 4</div>
+            <h2>When are you sharpest?</h2>
+            <p class="onb-sub">Scheduling hard tasks at your peak time measurably improves output.</p>
+            <div class="chip-group" id="onbTime">
+                <button type="button" class="chip" data-value="Early morning">Early morning</button>
+                <button type="button" class="chip" data-value="Mid-morning">Mid-morning</button>
+                <button type="button" class="chip" data-value="Afternoon">Afternoon</button>
+                <button type="button" class="chip" data-value="Evening">Evening</button>
+                <button type="button" class="chip" data-value="Late night">Late night</button>
+            </div>
+            <button class="btn-big" data-go="obstacle">Next</button>
+        </div>
+
+        <div class="onb-step" data-onb="obstacle">
+            <div class="onb-eyebrow">4 of 4</div>
+            <h2>What typically trips you up?</h2>
+            <p class="onb-sub">We'll factor this into how the app nudges you.</p>
+            <div class="chip-group" id="onbObstacle">
+                <button type="button" class="chip" data-value="Getting started">Getting started</button>
+                <button type="button" class="chip" data-value="Staying focused">Staying focused</button>
+                <button type="button" class="chip" data-value="Finding time">Finding time</button>
+                <button type="button" class="chip" data-value="Feeling overwhelmed">Feeling overwhelmed</button>
+            </div>
+            <input class="chip-custom" id="onbObstacleCustom" type="text" placeholder="Something else...">
+            <button class="btn-big" data-go="done">Next</button>
+        </div>
+
+        <div class="onb-step" data-onb="done">
+            <div class="onb-eyebrow">Ready</div>
+            <h2>You're set up.</h2>
+            <p>From here on, new tasks will already know where you work best, what distracts you, and when you're sharp — so you spend less time filling in forms and more time doing.</p>
+            <p class="onb-sub">You can update these answers any time from the menu.</p>
+            <button class="btn-big" id="onbFinish">Add my first task</button>
+        </div>
+    </div>
 </div>
 
 <!-- CITATION POPUP -->
@@ -754,7 +1081,100 @@
     state.visits = (state.visits || 0) + 1;
     if (!state.memberSince) state.memberSince = new Date().toISOString();
     if (!state.focusSessions) state.focusSessions = [];
+    if (!state.profile) state.profile = null;
     saveState();
+
+    // ════════════════════════════════════════════════════════════════
+    // ONBOARDING
+    // ════════════════════════════════════════════════════════════════
+
+    const onbEl = document.getElementById('onboarding');
+
+    function showOnboarding() {
+        // Pre-select chips if profile already exists (for editing)
+        if (state.profile) {
+            if (state.profile.location)    selectOnbChip('onbLocation',    state.profile.location);
+            if (state.profile.distraction) setOnbMulti('onbDistraction',   state.profile.distraction);
+            if (state.profile.sharpestTime) selectOnbChip('onbTime',       state.profile.sharpestTime);
+            if (state.profile.obstacle)    selectOnbChip('onbObstacle',    state.profile.obstacle);
+        }
+        onbEl.classList.add('active');
+        showOnbStep('welcome');
+    }
+
+    function showOnbStep(name) {
+        document.querySelectorAll('.onb-step').forEach(s => s.classList.remove('active'));
+        const step = document.querySelector('[data-onb="' + name + '"]');
+        if (step) step.classList.add('active');
+        window.scrollTo(0, 0);
+    }
+
+    function selectOnbChip(groupId, value) {
+        const g = document.getElementById(groupId);
+        g.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+        const chip = [...g.querySelectorAll('.chip')].find(c => c.dataset.value === value);
+        if (chip) chip.classList.add('selected');
+    }
+    function setOnbMulti(groupId, csv) {
+        const g = document.getElementById(groupId);
+        g.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+        csv.split(', ').filter(Boolean).forEach(v => {
+            const chip = [...g.querySelectorAll('.chip')].find(c => c.dataset.value === v);
+            if (chip) chip.classList.add('selected');
+        });
+    }
+
+    // Single-select behaviour for onb chip groups
+    ['onbLocation', 'onbTime', 'onbObstacle'].forEach(gid => {
+        document.getElementById(gid).addEventListener('click', e => {
+            const chip = e.target.closest('.chip'); if (!chip) return;
+            e.currentTarget.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+            chip.classList.add('selected');
+        });
+    });
+    // Multi-select for distractions
+    document.getElementById('onbDistraction').addEventListener('click', e => {
+        const chip = e.target.closest('.chip'); if (!chip) return;
+        chip.classList.toggle('selected');
+    });
+
+    // Next-step buttons
+    document.querySelectorAll('.onb-step [data-go]').forEach(btn => {
+        btn.addEventListener('click', () => showOnbStep(btn.dataset.go));
+    });
+
+    // Finish
+    document.getElementById('onbFinish').addEventListener('click', () => {
+        state.profile = {
+            location:     getOnbValue('onbLocation',    'onbLocationCustom',    false),
+            distraction:  getOnbValue('onbDistraction', 'onbDistractionCustom', true),
+            sharpestTime: getOnbValue('onbTime',        null,                   false),
+            obstacle:     getOnbValue('onbObstacle',    'onbObstacleCustom',    false),
+            completedAt:  Date.now(),
+        };
+        saveState();
+        onbEl.classList.remove('active');
+        setTimeout(() => openForm(null), 300);
+    });
+
+    function getOnbValue(groupId, customId, multi) {
+        const selected = [...document.querySelectorAll('#' + groupId + ' .chip.selected')]
+            .map(c => c.dataset.value);
+        const custom = customId ? (document.getElementById(customId).value || '').trim() : '';
+        if (custom) selected.push(custom);
+        return selected.join(', ');
+    }
+
+    // Edit preferences button in the menu
+    document.getElementById('editProfileBtn').addEventListener('click', () => {
+        toggleMenu(false);
+        showOnboarding();
+    });
+
+    // Show onboarding on first visit
+    if (!state.profile) {
+        setTimeout(showOnboarding, 200);
+    }
 
     let editingId = null;
     const calState = {
@@ -789,9 +1209,10 @@
         toggleMenu(false);
         window.scrollTo(0, 0);
 
-        if (name === 'stats')   renderStats();
-        if (name === 'ready')   renderReady();
-        if (name === 'science') renderScience();
+        if (name === 'stats')    renderStats();
+        if (name === 'ready')    renderReady();
+        if (name === 'science')  renderScience();
+        if (name === 'schedule') renderSchedule();
     }
 
     document.querySelectorAll('.menu-item').forEach(btn => {
@@ -874,6 +1295,33 @@
             STEPS.forEach(s => document.getElementById('step-' + s).classList.add('visible'));
             formFooter.classList.add('visible');
         } else {
+            // Pre-fill from profile defaults for new tasks
+            if (state.profile) {
+                if (state.profile.location) {
+                    const locChip = [...document.querySelectorAll('#chipsLocation .chip')]
+                        .find(c => c.dataset.value === state.profile.location);
+                    if (locChip) locChip.classList.add('selected');
+                    else document.getElementById('inputLocation').value = state.profile.location;
+                }
+                if (state.profile.distraction) {
+                    state.profile.distraction.split(', ').filter(Boolean).forEach(v => {
+                        const chip = [...document.querySelectorAll('#chipsDistraction .chip')]
+                            .find(c => c.dataset.value === v);
+                        if (chip) chip.classList.add('selected');
+                    });
+                }
+                if (state.profile.sharpestTime) {
+                    const chip = [...document.querySelectorAll('#chipsSharpTime .chip')]
+                        .find(c => c.dataset.value === state.profile.sharpestTime);
+                    if (chip) chip.classList.add('selected');
+                }
+                if (state.profile.obstacle) {
+                    const chip = [...document.querySelectorAll('#chipsObstacle .chip')]
+                        .find(c => c.dataset.value === state.profile.obstacle);
+                    if (chip) chip.classList.add('selected');
+                    else document.getElementById('inputObstacle').value = state.profile.obstacle;
+                }
+            }
             document.getElementById('step-title').classList.add('visible');
             document.getElementById('inputTitle').focus();
         }
@@ -1614,6 +2062,338 @@
     document.getElementById('citeOverlay').addEventListener('click', e => {
         if (e.target.id === 'citeOverlay') e.target.classList.remove('open');
     });
+
+    // ════════════════════════════════════════════════════════════════
+    // SCHEDULE (Day / Week / Month)
+    // ════════════════════════════════════════════════════════════════
+
+    const HOUR_HEIGHT   = 48;   // pixels per hour
+    const TASK_DURATION = 60;   // default task length in minutes
+    const schedState = {
+        mode: 'day',
+        date: new Date(),
+    };
+
+    document.querySelectorAll('.seg-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            schedState.mode = btn.dataset.sched;
+            renderSchedule();
+        });
+    });
+
+    document.getElementById('schedPrev').addEventListener('click', () => shiftSchedule(-1));
+    document.getElementById('schedNext').addEventListener('click', () => shiftSchedule(1));
+    document.getElementById('btnToday').addEventListener('click', () => {
+        schedState.date = new Date();
+        renderSchedule();
+    });
+
+    function shiftSchedule(dir) {
+        const d = new Date(schedState.date);
+        if (schedState.mode === 'day')   d.setDate(d.getDate() + dir);
+        if (schedState.mode === 'week')  d.setDate(d.getDate() + dir * 7);
+        if (schedState.mode === 'month') d.setMonth(d.getMonth() + dir);
+        schedState.date = d;
+        renderSchedule();
+    }
+
+    function renderSchedule() {
+        if (schedState.mode === 'day')   renderScheduleDay();
+        if (schedState.mode === 'week')  renderScheduleWeek();
+        if (schedState.mode === 'month') renderScheduleMonth();
+    }
+
+    function sameDay(a, b) {
+        return a.getFullYear() === b.getFullYear()
+            && a.getMonth() === b.getMonth()
+            && a.getDate() === b.getDate();
+    }
+
+    function startOfWeek(date) {
+        const d = new Date(date);
+        const day = d.getDay(); // 0 = Sun
+        d.setDate(d.getDate() - day);
+        d.setHours(0, 0, 0, 0);
+        return d;
+    }
+
+    function tasksOnDay(date) {
+        return state.tasks.filter(t => {
+            if (!t.scheduledFor) return false;
+            return sameDay(new Date(t.scheduledFor), date);
+        });
+    }
+
+    function buildTimeColumn() {
+        const col = document.createElement('div');
+        col.className = 'time-col';
+        for (let h = 0; h < 24; h++) {
+            const s = document.createElement('div');
+            s.className = 'time-slot';
+            const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+            const ampm = h < 12 ? 'AM' : 'PM';
+            s.textContent = h === 0 ? '' : h12 + ' ' + ampm;
+            col.appendChild(s);
+        }
+        return col;
+    }
+
+    function buildDayColumn(date) {
+        const col = document.createElement('div');
+        col.className = 'day-col' + (sameDay(date, new Date()) ? ' today' : '');
+
+        // Hour cells (background + click to create)
+        for (let h = 0; h < 24; h++) {
+            const cell = document.createElement('div');
+            cell.className = 'hour-cell';
+            cell.addEventListener('click', () => {
+                const d = new Date(date);
+                d.setHours(h, 0, 0, 0);
+                openFormWithSchedule(d);
+            });
+            col.appendChild(cell);
+        }
+
+        // Tasks positioned absolutely
+        tasksOnDay(date).forEach(task => {
+            const d = new Date(task.scheduledFor);
+            const mins = d.getHours() * 60 + d.getMinutes();
+            const top = (mins / 60) * HOUR_HEIGHT;
+            const height = (TASK_DURATION / 60) * HOUR_HEIGHT;
+
+            const el = document.createElement('div');
+            el.className = 'sched-task priority-' + task.priority + (task.status === 'completed' ? ' completed' : '');
+            el.style.top    = top + 'px';
+            el.style.height = (height - 2) + 'px';
+
+            const t = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+            el.innerHTML = '<div class="st-time">' + t + '</div>' +
+                '<div class="st-title">' + escapeHtml(task.title) + '</div>' +
+                (task.firstAction ? '<div class="st-action">→ ' + escapeHtml(task.firstAction) + '</div>' : '');
+
+            el.addEventListener('click', e => {
+                e.stopPropagation();
+                switchView('home');
+                openForm(task);
+            });
+            col.appendChild(el);
+        });
+
+        // Now line if today
+        if (sameDay(date, new Date())) {
+            const now = new Date();
+            const mins = now.getHours() * 60 + now.getMinutes();
+            const top = (mins / 60) * HOUR_HEIGHT;
+            const line = document.createElement('div');
+            line.className = 'now-line';
+            line.style.top = top + 'px';
+            col.appendChild(line);
+        }
+
+        return col;
+    }
+
+    function renderUnscheduledBlock(container, date) {
+        const un = state.tasks.filter(t => !t.scheduledFor && t.status !== 'completed');
+        if (!un.length) return;
+
+        const wrap = document.createElement('div');
+        wrap.className = 'unsched-block';
+        wrap.innerHTML = '<div class="unsched-label">Unscheduled</div>';
+
+        const list = document.createElement('div');
+        list.className = 'unsched-list';
+        un.forEach(t => {
+            const pill = document.createElement('div');
+            pill.className = 'unsched-pill' + (t.status === 'completed' ? ' completed' : '');
+            pill.textContent = t.title;
+            pill.addEventListener('click', () => {
+                switchView('home');
+                openForm(t);
+            });
+            list.appendChild(pill);
+        });
+        wrap.appendChild(list);
+        container.appendChild(wrap);
+    }
+
+    function renderScheduleDay() {
+        const body = document.getElementById('scheduleBody');
+        body.innerHTML = '';
+
+        const date = new Date(schedState.date);
+        document.getElementById('schedTitle').textContent =
+            date.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+
+        const tl = document.createElement('div');
+        tl.className = 'timeline';
+
+        // Head
+        const head = document.createElement('div');
+        head.className = 'timeline-head';
+        head.style.gridTemplateColumns = '50px 1fr';
+        const empty = document.createElement('div');
+        empty.className = 'timeline-head-cell';
+        empty.textContent = '';
+        head.appendChild(empty);
+        const dh = document.createElement('div');
+        dh.className = 'timeline-head-cell' + (sameDay(date, new Date()) ? ' today' : '');
+        dh.innerHTML = date.toLocaleDateString([], { weekday: 'short' }) +
+            '<span class="timeline-head-date">' + date.getDate() + '</span>';
+        head.appendChild(dh);
+        tl.appendChild(head);
+
+        // Body
+        const body2 = document.createElement('div');
+        body2.className = 'timeline-body';
+        body2.style.gridTemplateColumns = '50px 1fr';
+        body2.appendChild(buildTimeColumn());
+        body2.appendChild(buildDayColumn(date));
+        tl.appendChild(body2);
+
+        body.appendChild(tl);
+        renderUnscheduledBlock(body, date);
+
+        // Scroll to 7am by default, or current time if today
+        setTimeout(() => {
+            const targetHour = sameDay(date, new Date()) ? new Date().getHours() - 1 : 7;
+            body2.scrollTop = Math.max(0, targetHour * HOUR_HEIGHT);
+        }, 30);
+    }
+
+    function renderScheduleWeek() {
+        const body = document.getElementById('scheduleBody');
+        body.innerHTML = '';
+
+        const start = startOfWeek(schedState.date);
+        const end   = new Date(start); end.setDate(end.getDate() + 6);
+
+        document.getElementById('schedTitle').textContent =
+            start.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' – ' +
+            end.toLocaleDateString([], { month: 'short', day: 'numeric' });
+
+        const tl = document.createElement('div');
+        tl.className = 'timeline';
+
+        // Head
+        const head = document.createElement('div');
+        head.className = 'timeline-head';
+        head.style.gridTemplateColumns = '50px repeat(7, 1fr)';
+        const empty = document.createElement('div');
+        empty.className = 'timeline-head-cell';
+        head.appendChild(empty);
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(start); d.setDate(d.getDate() + i);
+            const hc = document.createElement('div');
+            hc.className = 'timeline-head-cell' + (sameDay(d, new Date()) ? ' today' : '');
+            hc.innerHTML = d.toLocaleDateString([], { weekday: 'short' }) +
+                '<span class="timeline-head-date">' + d.getDate() + '</span>';
+            head.appendChild(hc);
+        }
+        tl.appendChild(head);
+
+        // Body
+        const body2 = document.createElement('div');
+        body2.className = 'timeline-body';
+        body2.style.gridTemplateColumns = '50px repeat(7, 1fr)';
+        body2.appendChild(buildTimeColumn());
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(start); d.setDate(d.getDate() + i);
+            body2.appendChild(buildDayColumn(d));
+        }
+        tl.appendChild(body2);
+        body.appendChild(tl);
+
+        renderUnscheduledBlock(body, start);
+
+        setTimeout(() => {
+            const now = new Date();
+            const inWeek = now >= start && now <= end;
+            const targetHour = inWeek ? now.getHours() - 1 : 7;
+            body2.scrollTop = Math.max(0, targetHour * HOUR_HEIGHT);
+        }, 30);
+    }
+
+    function renderScheduleMonth() {
+        const body = document.getElementById('scheduleBody');
+        body.innerHTML = '';
+
+        const date = new Date(schedState.date);
+        document.getElementById('schedTitle').textContent =
+            date.toLocaleDateString([], { month: 'long', year: 'numeric' });
+
+        const first = new Date(date.getFullYear(), date.getMonth(), 1);
+        const startOffset = first.getDay();
+        const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+        const totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
+
+        const grid = document.createElement('div');
+        grid.className = 'month-grid';
+
+        ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d => {
+            const h = document.createElement('div');
+            h.className = 'month-header'; h.textContent = d;
+            grid.appendChild(h);
+        });
+
+        const now = new Date();
+        for (let i = 0; i < totalCells; i++) {
+            const dayNum = i - startOffset + 1;
+            const cellDate = new Date(date.getFullYear(), date.getMonth(), dayNum);
+            const otherMonth = cellDate.getMonth() !== date.getMonth();
+            const cell = document.createElement('div');
+            cell.className = 'month-cell' +
+                (otherMonth ? ' other-month' : '') +
+                (sameDay(cellDate, now) ? ' today' : '');
+
+            const num = document.createElement('div');
+            num.className = 'month-day-num';
+            num.textContent = cellDate.getDate();
+            cell.appendChild(num);
+
+            const tasksToday = tasksOnDay(cellDate).sort((a,b) =>
+                new Date(a.scheduledFor) - new Date(b.scheduledFor));
+            const MAX = 3;
+            tasksToday.slice(0, MAX).forEach(t => {
+                const tEl = document.createElement('div');
+                tEl.className = 'month-task priority-' + t.priority + (t.status === 'completed' ? ' completed' : '');
+                tEl.textContent = t.title;
+                cell.appendChild(tEl);
+            });
+            if (tasksToday.length > MAX) {
+                const more = document.createElement('div');
+                more.className = 'month-more';
+                more.textContent = '+' + (tasksToday.length - MAX) + ' more';
+                cell.appendChild(more);
+            }
+
+            cell.addEventListener('click', () => {
+                schedState.date = cellDate;
+                schedState.mode = 'day';
+                document.querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.sched === 'day'));
+                renderSchedule();
+            });
+            grid.appendChild(cell);
+        }
+
+        body.appendChild(grid);
+    }
+
+    function openFormWithSchedule(date) {
+        switchView('home');
+        openForm(null);
+        // Pre-fill the schedule step with the clicked time
+        calState.schedule.selected = new Date(date);
+        calState.schedule.year  = date.getFullYear();
+        calState.schedule.month = date.getMonth();
+        buildCalendar('schedule');
+        const t12 = to12Hour(date.getHours());
+        document.getElementById('timeHour').value   = String(t12.hour);
+        document.getElementById('timeAmPm').value   = t12.ampm;
+        document.getElementById('timeMinute').value = '00';
+    }
 
     // ════════════════════════════════════════════════════════════════
     // HELPERS
