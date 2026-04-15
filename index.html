@@ -1341,10 +1341,28 @@
         if (inp && inp.tagName === 'INPUT') setTimeout(() => inp.focus(), 50);
         if (id === 'done') formFooter.classList.add('visible');
     }
+    function getSkipSteps() {
+        // Only skip during new-task creation when profile already has that value
+        if (editingId || !state.profile) return [];
+        const skip = [];
+        if (state.profile.location)     skip.push('location');
+        if (state.profile.distraction)  skip.push('distraction');
+        if (state.profile.sharpestTime) skip.push('time');
+        if (state.profile.obstacle)     skip.push('obstacle');
+        return skip;
+    }
+
     function nextAfter(cur) {
-        const i = STEPS.indexOf(cur);
-        if (i < STEPS.length - 1) revealStep(STEPS[i + 1]);
-        else formFooter.classList.add('visible');
+        const skip = getSkipSteps();
+        let i = STEPS.indexOf(cur);
+        while (i < STEPS.length - 1) {
+            i++;
+            if (!skip.includes(STEPS[i])) {
+                revealStep(STEPS[i]);
+                return;
+            }
+        }
+        formFooter.classList.add('visible');
     }
 
     function selectChip(gid, value) {
