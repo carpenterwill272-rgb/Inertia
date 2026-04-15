@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0e1512">
+    <link rel="manifest" href="manifest.json">
+    <title>Inertia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #0e1512; color: #d4ddd6;
+            min-height: 100vh; padding: 0;
+        }
+        .container { max-width: 640px; margin: 0 auto; padding: 32px 20px 60px; }
+
+        /* ── TOP BAR ── */
+        .topbar {
+            position: sticky; top: 0; z-index: 20;
+            background: rgba(14,21,18,0.92); backdrop-filter: blur(8px);
+            border-bottom: 1px solid #162219;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 20px;
+        }
+        .topbar-brand {
+            font-size: 14px; font-weight: 500; color: #d4ddd6;
+            letter-spacing: 0.2em; text-transform: uppercase;
+        }
+        .hamburger {
+            background: none; border: none; cursor: pointer;
+            width: 28px; height: 28px; display: flex; flex-direction: column;
+            justify-content: center; gap: 5px; padding: 0;
+        }
+        .hamburger span {
+            display: block; width: 22px; height: 1.5px;
+            background: #d4ddd6; transition: all 0.25s;
+        }
+        .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        /* ── SLIDE-OUT MENU ── */
+        .menu-backdrop {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5);
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.25s; z-index: 25;
+        }
+        .menu-backdrop.open { opacity: 1; pointer-events: auto; }
+        .side-menu {
+            position: fixed; top: 0; right: 0; bottom: 0;
+            width: 280px; max-width: 80vw;
+            background: #111916; border-left: 1px solid #1c2a1f;
+            padding: 72px 24px 24px; z-index: 30;
+            transform: translateX(100%); transition: transform 0.3s ease;
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        .side-menu.open { transform: translateX(0); }
+        .menu-item {
+            padding: 12px 16px; font-size: 14px; color: #6b8f74;
+            background: none; border: none; text-align: left;
+            border-radius: 8px; cursor: pointer;
+            font-family: 'Inter', system-ui, sans-serif;
+            transition: background 0.15s, color 0.15s;
+        }
+        .menu-item:hover { background: #162219; color: #d4ddd6; }
+        .menu-item.active { background: #162219; color: #d4ddd6; font-weight: 500; }
+        .menu-footer {
+            margin-top: auto; padding-top: 20px; border-top: 1px solid #1c2a1f;
+            font-size: 11px; color: #3a5040; line-height: 1.6;
+        }
+
+        /* ── VIEWS ── */
+        .view { display: none; }
+        .view.active { display: block; }
+
+        /* ── HEADER ── */
+        .header { margin-bottom: 36px; }
+        .header h1 {
+            font-size: 22px; font-weight: 400; color: #d4ddd6;
+            letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px;
+        }
+        .header p { font-size: 13px; color: #3a5040; }
+        .section-title {
+            font-size: 11px; font-weight: 600; letter-spacing: 0.14em;
+            text-transform: uppercase; color: #5a8a6e; margin-bottom: 14px;
+        }
+
+        /* ── ADD BUTTON + INLINE FORM ── */
+        .btn-add {
+            width: 100%; padding: 14px 18px; font-size: 14px;
+            font-family: 'Inter', system-ui, sans-serif; font-weight: 400;
+            background: transparent; color: #3a5040;
+            border: 1.5px dashed #1c2a1f; border-radius: 8px;
+            cursor: pointer; text-align: left; margin-bottom: 24px;
+            transition: all 0.2s;
+        }
+        .btn-add:hover { border-color: #5a8a6e; color: #d4ddd6; }
+        .btn-add.open { display: none; }
+
+        .inline-form {
+            display: none; background: #111916;
+            border: 1.5px solid #1c2a1f; border-radius: 10px;
+            margin-bottom: 24px; overflow: hidden;
+        }
+        .inline-form.open { display: block; }
+        .form-step { display: none; padding: 20px 20px 0; animation: fadeSlide 0.2s; }
+        .form-step.visible { display: block; }
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .step-label {
+            font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+            text-transform: uppercase; color: #3a5040; margin-bottom: 10px;
+        }
+
+        .step-input {
+            width: 100%; padding: 10px 0; font-size: 16px;
+            font-family: 'Inter', system-ui, sans-serif; font-weight: 500;
+            background: transparent; color: #d4ddd6;
+            border: none; border-bottom: 1.5px solid #1c2a1f;
+            outline: none; transition: border-color 0.2s; margin-bottom: 12px;
+        }
+        .step-input:focus { border-bottom-color: #5a8a6e; }
+        .step-input::placeholder { color: #2e4035; }
+
+        /* ── CHIPS ── */
+        .chip-group { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+        .chip {
+            padding: 6px 14px; font-size: 13px;
+            font-family: 'Inter', system-ui, sans-serif;
+            border: 1.5px solid #1c2a1f; border-radius: 20px;
+            background: transparent; color: #4a6355;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .chip:hover { border-color: #5a8a6e; color: #d4ddd6; }
+        .chip.selected { border-color: #5a8a6e; background: #162219; color: #d4ddd6; }
+        .chip-custom {
+            width: 100%; padding: 7px 0; font-size: 13px;
+            font-family: 'Inter', system-ui, sans-serif;
+            background: transparent; color: #d4ddd6;
+            border: none; border-bottom: 1.5px solid #1c2a1f;
+            outline: none; transition: border-color 0.2s; margin-bottom: 16px;
+        }
+        .chip-custom:focus { border-bottom-color: #5a8a6e; }
+        .chip-custom::placeholder { color: #2e4035; }
+
+        /* ── CALENDAR ── */
+        .calendar { margin-bottom: 16px; }
+        .cal-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .cal-header span { font-size: 14px; font-weight: 500; color: #d4ddd6; }
+        .cal-nav {
+            background: none; border: none; color: #4a6355;
+            cursor: pointer; font-size: 18px; padding: 4px 10px;
+            transition: color 0.15s;
+        }
+        .cal-nav:hover { color: #d4ddd6; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+        .cal-day-name {
+            text-align: center; font-size: 11px; color: #3a5040;
+            padding: 4px 0; font-weight: 500;
+        }
+        .cal-day {
+            text-align: center; font-size: 13px; padding: 7px 4px;
+            border-radius: 6px; cursor: pointer; color: #6b8f74;
+            transition: all 0.15s; background: none; border: none;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .cal-day:hover:not(.empty):not(.past) { background: #162219; color: #d4ddd6; }
+        .cal-day.today    { color: #d4ddd6; font-weight: 600; }
+        .cal-day.selected { background: #5a8a6e; color: #0e1512; font-weight: 600; }
+        .cal-day.past     { color: #2a3a2f; cursor: default; }
+        .cal-day.empty    { cursor: default; }
+
+        .time-row {
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 16px; margin-top: 8px;
+        }
+        .time-label { font-size: 12px; color: #3a5040; }
+        .time-select {
+            background: #121a14; border: 1.5px solid #1c2a1f;
+            border-radius: 6px; color: #d4ddd6; font-size: 13px;
+            font-family: 'Inter', system-ui, sans-serif;
+            padding: 5px 8px; outline: none; cursor: pointer;
+        }
+        .time-select:focus { border-color: #5a8a6e; }
+
+        /* ── FORM FOOTER ── */
+        .form-footer {
+            display: none; padding: 16px 20px;
+            border-top: 1px solid #1c2a1f;
+            justify-content: space-between; align-items: center;
+        }
+        .form-footer.visible { display: flex; }
+        .btn-discard {
+            font-size: 13px; color: #3a5040; background: none;
+            border: none; cursor: pointer; transition: color 0.2s;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .btn-discard:hover { color: #d4ddd6; }
+        .btn-save {
+            padding: 9px 20px; font-size: 13px; font-weight: 600;
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #5a8a6e; color: #0e1512;
+            border: none; border-radius: 6px; cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-save:hover { background: #6a9e82; }
+
+        /* ── TASK LIST ── */
+        .task-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .task-card {
+            background: #111916; border: 1.5px solid #1c2a1f;
+            border-radius: 10px; padding: 14px 16px;
+            transition: background 0.2s, box-shadow 0.2s;
+            border-left: 3px solid #5a8a6e;
+        }
+        .task-card:hover { background: #151e16; box-shadow: 0 4px 16px rgba(0,0,0,0.25); }
+        .task-card.priority-high   { border-left-color: #6a9e82; }
+        .task-card.priority-medium { border-left-color: #5a8a6e; }
+        .task-card.priority-low    { border-left-color: #2d6a4f; }
+        .task-card.completed       { opacity: 0.4; border-left-color: #1c2a1f; }
+        .task-card.completed .task-title { text-decoration: line-through; }
+
+        .task-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
+        .task-title  { font-size: 15px; font-weight: 600; color: #d4ddd6; cursor: pointer; }
+        .task-actions { display: flex; gap: 4px; }
+        .task-btn {
+            font-size: 11px; color: #3a5040; background: none; border: none;
+            cursor: pointer; padding: 2px 6px;
+            font-family: 'Inter', system-ui, sans-serif; transition: color 0.2s;
+        }
+        .task-btn:hover { color: #5a8a6e; }
+        .task-btn.focus:hover { color: #6a9e82; }
+
+        .task-first-action {
+            font-size: 12px; color: #3a5040; margin-bottom: 8px;
+            padding-left: 10px; border-left: 2px solid #1c2a1f;
+            cursor: pointer;
+        }
+        .task-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+        .meta-tag {
+            font-size: 11px; padding: 2px 8px; border-radius: 20px;
+            font-weight: 500; cursor: pointer;
+        }
+        .meta-scheduled        { background: #141e15; color: #5a8a6e; }
+        .meta-deadline         { background: #141e15; color: #4a6355; }
+        .meta-deadline.urgent  { background: #211a08; color: #e9a84c; }
+        .meta-deadline.overdue { background: #200d0d; color: #c0392b; }
+        .meta-category         { background: #141e15; color: #4a6355; }
+        .meta-context          { background: #141e15; color: #4a6355; }
+
+        .empty-state { text-align: center; padding: 60px 20px; color: #2e4035; }
+        .empty-state p { font-size: 14px; }
+
+        /* ── STATS ── */
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 10px; margin-bottom: 24px;
+        }
+        .stat-card {
+            background: #111916; border: 1.5px solid #1c2a1f;
+            border-radius: 10px; padding: 16px;
+        }
+        .stat-value {
+            font-size: 28px; font-weight: 700; color: #d4ddd6;
+            line-height: 1; margin-bottom: 4px;
+        }
+        .stat-label {
+            font-size: 11px; font-weight: 500; letter-spacing: 0.08em;
+            text-transform: uppercase; color: #3a5040;
+        }
+        .stat-sub { font-size: 11px; color: #5a8a6e; margin-top: 6px; }
+
+        .progress-bar {
+            height: 6px; background: #162219; border-radius: 3px;
+            overflow: hidden; margin-top: 8px;
+        }
+        .progress-fill {
+            height: 100%; background: #5a8a6e;
+            transition: width 0.4s ease;
+        }
+
+        .category-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 0; font-size: 13px;
+        }
+        .category-row:not(:last-child) { border-bottom: 1px solid #162219; }
+        .category-name { color: #d4ddd6; text-transform: capitalize; }
+        .category-stat { color: #5a8a6e; }
+
+        .insight-card {
+            background: #111916; border: 1.5px solid #1c2a1f;
+            border-radius: 10px; padding: 16px; margin-bottom: 10px;
+        }
+        .insight-label {
+            font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+            text-transform: uppercase; color: #3a5040; margin-bottom: 6px;
+        }
+        .insight-value { font-size: 15px; color: #d4ddd6; font-weight: 500; }
+        .insight-note  { font-size: 12px; color: #5a8a6e; margin-top: 4px; }
+
+        /* ── READY TO WORK ── */
+        .ready-intro {
+            background: #111916; border: 1.5px solid #1c2a1f;
+            border-radius: 10px; padding: 20px; margin-bottom: 20px;
+        }
+        .ready-task {
+            font-size: 16px; font-weight: 600; color: #d4ddd6; margin-bottom: 6px;
+        }
+        .ready-action {
+            font-size: 13px; color: #5a8a6e;
+            padding-left: 10px; border-left: 2px solid #1c2a1f;
+        }
+
+        .check-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+        .check-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px; background: #111916;
+            border: 1.5px solid #1c2a1f; border-radius: 8px;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .check-item:hover { border-color: #5a8a6e; }
+        .check-item.checked { background: #162219; border-color: #5a8a6e; }
+        .check-box {
+            width: 18px; height: 18px; border: 1.5px solid #3a5040;
+            border-radius: 5px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; color: #0e1512; transition: all 0.15s;
+        }
+        .check-item.checked .check-box {
+            background: #5a8a6e; border-color: #5a8a6e;
+        }
+        .check-text { font-size: 14px; color: #d4ddd6; }
+        .check-item.checked .check-text { color: #6b8f74; }
+
+        .btn-big {
+            width: 100%; padding: 14px; font-size: 15px; font-weight: 600;
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #5a8a6e; color: #0e1512;
+            border: none; border-radius: 8px; cursor: pointer;
+            transition: background 0.2s; margin-bottom: 8px;
+        }
+        .btn-big:hover:not(:disabled) { background: #6a9e82; }
+        .btn-big:disabled { background: #1c2a1f; color: #3a5040; cursor: not-allowed; }
+        .btn-secondary {
+            width: 100%; padding: 12px; font-size: 13px; font-weight: 500;
+            font-family: 'Inter', system-ui, sans-serif;
+            background: transparent; color: #5a8a6e;
+            border: 1.5px solid #1c2a1f; border-radius: 8px; cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover { border-color: #5a8a6e; }
+
+        /* ── TIMER ── */
+        .timer-display {
+            text-align: center; padding: 40px 20px;
+            background: #111916; border: 1.5px solid #1c2a1f;
+            border-radius: 10px; margin-bottom: 16px;
+        }
+        .timer-time {
+            font-size: 56px; font-weight: 300; color: #d4ddd6;
+            letter-spacing: 0.04em; font-variant-numeric: tabular-nums;
+        }
+        .timer-label {
+            font-size: 12px; color: #5a8a6e; margin-top: 8px;
+            letter-spacing: 0.1em; text-transform: uppercase;
+        }
+        .timer-controls {
+            display: flex; gap: 8px; margin-bottom: 16px;
+        }
+        .timer-duration {
+            display: flex; gap: 6px; justify-content: center;
+            margin-bottom: 16px; flex-wrap: wrap;
+        }
+
+        /* ── SCIENCE ── */
+        .science-intro {
+            background: #111916; border: 1.5px solid #1c2a1f;
+            border-radius: 10px; padding: 20px 22px; margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .science-intro p { font-size: 14px; color: #b5c5b9; margin-bottom: 10px; }
+        .science-intro p:last-child { margin-bottom: 0; }
+        .science-intro strong { color: #d4ddd6; font-weight: 600; }
+
+        .feature-card {
+            background: #111916; border: 1.5px solid #1c2a1f;
+            border-radius: 10px; margin-bottom: 10px; overflow: hidden;
+            transition: border-color 0.2s;
+        }
+        .feature-card:hover { border-color: #2a3d30; }
+        .feature-head {
+            padding: 14px 18px; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .feature-title { font-size: 14px; font-weight: 600; color: #d4ddd6; }
+        .feature-toggle { color: #4a6355; font-size: 18px; transition: transform 0.2s; }
+        .feature-card.open .feature-toggle { transform: rotate(45deg); }
+        .feature-body {
+            display: none; padding: 0 18px 18px;
+            font-size: 13px; line-height: 1.6; color: #b5c5b9;
+        }
+        .feature-card.open .feature-body { display: block; }
+        .feature-body p { margin-bottom: 10px; }
+        .feature-body strong { color: #d4ddd6; }
+        .citation {
+            color: #5a8a6e; cursor: pointer; border-bottom: 1px dotted #5a8a6e;
+            padding-bottom: 1px;
+        }
+        .citation:hover { color: #6a9e82; }
+
+        /* ── CITATION POPUP ── */
+        .cite-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.7); z-index: 50;
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .cite-overlay.open { display: flex; }
+        .cite-box {
+            background: #111916; border: 1.5px solid #1c2a1f;
+            border-radius: 12px; padding: 24px; max-width: 440px; width: 100%;
+        }
+        .cite-box h3 { font-size: 15px; color: #d4ddd6; margin-bottom: 10px; }
+        .cite-box p { font-size: 13px; color: #b5c5b9; line-height: 1.6; margin-bottom: 12px; }
+        .cite-box .cite-full {
+            font-size: 12px; color: #5a8a6e;
+            padding: 12px; background: #0e1512;
+            border-radius: 6px; line-height: 1.5;
+        }
+        .cite-close {
+            margin-top: 16px; padding: 8px 16px;
+            background: #162219; border: none; border-radius: 6px;
+            color: #d4ddd6; font-size: 13px; cursor: pointer;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+    </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+    <div class="topbar-brand">Inertia</div>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+    </button>
+</div>
+
+<!-- SLIDE-OUT MENU -->
+<div class="menu-backdrop" id="menuBackdrop"></div>
+<aside class="side-menu" id="sideMenu">
+    <button class="menu-item active" data-view="home">Home</button>
+    <button class="menu-item" data-view="ready">Ready to Work</button>
+    <button class="menu-item" data-view="stats">Progress</button>
+    <button class="menu-item" data-view="science">Why Inertia Works</button>
+    <div class="menu-footer">
+        <div>Visits: <span id="visitCount">0</span></div>
+        <div style="margin-top:4px">Member since <span id="memberSince"></span></div>
+    </div>
+</aside>
+
+<div class="container">
+
+<!-- ═══ HOME VIEW ═══ -->
+<section class="view active" id="view-home">
+    <div class="header">
+        <h1>Today</h1>
+        <p id="todayDate"></p>
+    </div>
+
+    <button class="btn-add" id="addButton">+ What do you need to do?</button>
+
+    <div class="inline-form" id="inlineForm">
+        <div class="form-step visible" id="step-title">
+            <div class="step-label">What do you need to do?</div>
+            <input class="step-input" id="inputTitle" type="text" placeholder="Name the task...">
+        </div>
+        <div class="form-step" id="step-category">
+            <div class="step-label">What is it related to?</div>
+            <div class="chip-group" id="chipsCategory">
+                <button type="button" class="chip" data-value="work">Work</button>
+                <button type="button" class="chip" data-value="study">Study</button>
+                <button type="button" class="chip" data-value="school">School</button>
+                <button type="button" class="chip" data-value="personal">Personal</button>
+                <button type="button" class="chip" data-value="health">Health</button>
+                <button type="button" class="chip" data-value="other">Other</button>
+            </div>
+        </div>
+        <div class="form-step" id="step-action">
+            <div class="step-label">What's the first action you'll take?</div>
+            <div class="chip-group" id="chipsAction"></div>
+            <input class="chip-custom" id="inputAction" type="text" placeholder="Or describe your own first step...">
+        </div>
+        <div class="form-step" id="step-schedule">
+            <div class="step-label">When will you work on this?</div>
+            <div class="calendar">
+                <div class="cal-header">
+                    <button class="cal-nav" id="calPrev">&#8249;</button>
+                    <span id="calMonthYear"></span>
+                    <button class="cal-nav" id="calNext">&#8250;</button>
+                </div>
+                <div class="cal-grid" id="calGrid"></div>
+            </div>
+            <div class="time-row">
+                <span class="time-label">Time</span>
+                <select class="time-select" id="timeHour"></select>
+                <span class="time-label">:</span>
+                <select class="time-select" id="timeMinute"></select>
+                <select class="time-select" id="timeAmPm">
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-step" id="step-deadline">
+            <div class="step-label">What's the deadline?</div>
+            <div class="calendar">
+                <div class="cal-header">
+                    <button class="cal-nav" id="dlCalPrev">&#8249;</button>
+                    <span id="dlCalMonthYear"></span>
+                    <button class="cal-nav" id="dlCalNext">&#8250;</button>
+                </div>
+                <div class="cal-grid" id="dlCalGrid"></div>
+            </div>
+            <button type="button" class="chip" id="btnSkipDeadline" style="margin-bottom:16px">No deadline</button>
+        </div>
+        <div class="form-step" id="step-priority">
+            <div class="step-label">How important is this?</div>
+            <div class="chip-group" id="chipsPriority">
+                <button type="button" class="chip" data-value="high">High</button>
+                <button type="button" class="chip selected" data-value="medium">Medium</button>
+                <button type="button" class="chip" data-value="low">Low</button>
+            </div>
+        </div>
+        <div class="form-step" id="step-location">
+            <div class="step-label">Where do you do your best work?</div>
+            <div class="chip-group" id="chipsLocation">
+                <button type="button" class="chip" data-value="My desk">My desk</button>
+                <button type="button" class="chip" data-value="Coffee shop">Coffee shop</button>
+                <button type="button" class="chip" data-value="Library">Library</button>
+                <button type="button" class="chip" data-value="Outside">Outside</button>
+            </div>
+            <input class="chip-custom" id="inputLocation" type="text" placeholder="Somewhere else...">
+        </div>
+        <div class="form-step" id="step-distraction">
+            <div class="step-label">What normally distracts you?</div>
+            <div class="chip-group" id="chipsDistraction">
+                <button type="button" class="chip" data-value="Phone">Phone</button>
+                <button type="button" class="chip" data-value="Social media">Social media</button>
+                <button type="button" class="chip" data-value="Noise">Noise</button>
+                <button type="button" class="chip" data-value="People">People</button>
+                <button type="button" class="chip" data-value="Other thoughts">Other thoughts</button>
+            </div>
+            <input class="chip-custom" id="inputDistraction" type="text" placeholder="Something else...">
+        </div>
+        <div class="form-step" id="step-time">
+            <div class="step-label">When are you sharpest?</div>
+            <div class="chip-group" id="chipsSharpTime">
+                <button type="button" class="chip" data-value="Early morning">Early morning</button>
+                <button type="button" class="chip" data-value="Mid-morning">Mid-morning</button>
+                <button type="button" class="chip" data-value="Afternoon">Afternoon</button>
+                <button type="button" class="chip" data-value="Evening">Evening</button>
+                <button type="button" class="chip" data-value="Late night">Late night</button>
+            </div>
+        </div>
+        <div class="form-step" id="step-obstacle">
+            <div class="step-label">What's the biggest obstacle?</div>
+            <div class="chip-group" id="chipsObstacle">
+                <button type="button" class="chip" data-value="Getting started">Getting started</button>
+                <button type="button" class="chip" data-value="Staying focused">Staying focused</button>
+                <button type="button" class="chip" data-value="Finding time">Finding time</button>
+                <button type="button" class="chip" data-value="Feeling overwhelmed">Feeling overwhelmed</button>
+            </div>
+            <input class="chip-custom" id="inputObstacle" type="text" placeholder="Something else...">
+        </div>
+        <div class="form-step" id="step-done">
+            <div class="step-label">What does done look like?</div>
+            <div class="chip-group" id="chipsDone"></div>
+            <input class="chip-custom" id="inputDone" type="text" placeholder="Or describe your own endpoint...">
+        </div>
+        <div class="form-footer" id="formFooter">
+            <button class="btn-discard" id="btnDiscard">Discard</button>
+            <button class="btn-save" id="btnSave">Save Task</button>
+        </div>
+    </div>
+
+    <ul class="task-list" id="taskList"></ul>
+</section>
+
+<!-- ═══ READY TO WORK VIEW ═══ -->
+<section class="view" id="view-ready">
+    <div class="header">
+        <h1>Ready to Work</h1>
+        <p>Set up your environment, then focus</p>
+    </div>
+    <div id="readyContent"></div>
+</section>
+
+<!-- ═══ STATS VIEW ═══ -->
+<section class="view" id="view-stats">
+    <div class="header">
+        <h1>Progress</h1>
+        <p>How you're moving over time</p>
+    </div>
+    <div id="statsContent"></div>
+</section>
+
+<!-- ═══ SCIENCE VIEW ═══ -->
+<section class="view" id="view-science">
+    <div class="header">
+        <h1>Why Inertia Works</h1>
+        <p>Each feature mapped to peer-reviewed research</p>
+    </div>
+    <div class="science-intro">
+        <p>Procrastination isn't a character flaw — it's a predictable response to specific conditions your brain finds aversive. Vague goals, distant rewards, and overwhelming tasks all trigger avoidance.</p>
+        <p><strong>Inertia is built around findings from behavioural psychology, cognitive science, and habit research</strong> — not gamification tricks. Every field in the task flow exists because a peer-reviewed study shows it meaningfully increases follow-through.</p>
+        <p>Tap any feature below to see the research it's based on.</p>
+    </div>
+    <div id="featureList"></div>
+</section>
+
+</div>
+
+<!-- CITATION POPUP -->
+<div class="cite-overlay" id="citeOverlay">
+    <div class="cite-box">
+        <h3 id="citeTitle"></h3>
+        <p id="citeFinding"></p>
+        <div class="cite-full" id="citeFull"></div>
+        <button class="cite-close" id="citeClose">Close</button>
+    </div>
+</div>
+
+<script>
+    // ════════════════════════════════════════════════════════════════
+    // DATA
+    // ════════════════════════════════════════════════════════════════
+
+    const FIRST_ACTIONS = {
+        work:     ['Open the document', 'Write the first paragraph', 'Send one email', 'Schedule the meeting', 'Review my notes', 'Create an outline'],
+        study:    ['Open textbook to the chapter', 'Write down key terms', 'Watch the first 10 minutes', 'Create a summary page', 'Review previous notes'],
+        school:   ['Read the assignment brief', 'Write a rough outline', 'Find 3 sources', 'Write the introduction', 'Review marking criteria'],
+        personal: ['Write down all the steps', 'Make the call', 'Research options', 'Set a reminder', 'Tell someone my plan'],
+        health:   ['Put on workout clothes', 'Open the app', 'Prepare ingredients', 'Book the appointment', 'Look up the routine'],
+        other:    ['Write down what needs to happen', 'Start for just 5 minutes', 'Find the information I need'],
+    };
+
+    const DONE_LOOKS = {
+        work:     ['Document sent', 'Draft complete', 'Meeting scheduled', 'Email replied', 'Feedback received', 'Presented'],
+        study:    ['Chapter read', 'Notes written', 'Summary complete', 'All flashcards reviewed', 'Quiz passed'],
+        school:   ['Assignment submitted', 'Essay finished', 'All questions answered', 'Research complete', 'Reviewed by peer'],
+        personal: ['Call made', 'Decision made', 'Errand done', 'Plan written down', 'Booked'],
+        health:   ['Workout complete', 'Meal prepped', 'Appointment kept', 'Steps hit', 'Journaled'],
+        other:    ['Outcome achieved', 'Result delivered', 'Done and checked off'],
+    };
+
+    const CITATIONS = {
+        gollwitzer: {
+            title: 'Implementation Intentions',
+            finding: 'People who form "if-then" plans — specifying when, where, and how they will act — follow through on goals at rates 2–3× higher than those who only set the goal.',
+            full: 'Gollwitzer, P. M. (1999). Implementation intentions: Strong effects of simple plans. American Psychologist, 54(7), 493–503.'
+        },
+        steel: {
+            title: 'Temporal Motivation Theory',
+            finding: 'Procrastination is predictable: motivation to act is proportional to the expectancy and value of a reward, and inversely proportional to its delay. Reducing the delay between action and visible progress increases follow-through.',
+            full: 'Steel, P. (2007). The nature of procrastination: A meta-analytic and theoretical review of quintessential self-regulatory failure. Psychological Bulletin, 133(1), 65–94.'
+        },
+        locke: {
+            title: 'Goal-Setting Theory',
+            finding: 'Specific, measurable goals produce significantly higher performance than "do your best" goals. Knowing exactly what "done" looks like reduces ambiguity and rumination.',
+            full: 'Locke, E. A., & Latham, G. P. (1990). A theory of goal setting and task performance. Prentice-Hall.'
+        },
+        oettingen: {
+            title: 'Mental Contrasting (WOOP)',
+            finding: 'Naming the obstacle you expect to face doubles the likelihood of completing a goal compared to positive visualization alone. Anticipating obstacles activates planning and reduces avoidance.',
+            full: 'Oettingen, G. (2012). Future thought and behaviour change. European Review of Social Psychology, 23(1), 1–63.'
+        },
+        newport: {
+            title: 'Deep Work / Environmental Design',
+            finding: 'Controlling your physical environment — removing distractions, choosing a dedicated location — is among the most reliable interventions for sustained focus. Environment predicts behaviour more than willpower does.',
+            full: 'Newport, C. (2016). Deep Work: Rules for Focused Success in a Distracted World. Grand Central Publishing.'
+        },
+        pink: {
+            title: 'Chronobiology & Peak Performance',
+            finding: 'Cognitive performance follows a daily rhythm that varies between individuals. Scheduling demanding tasks during your personal peak time measurably improves output quality.',
+            full: 'Pink, D. H. (2018). When: The Scientific Secrets of Perfect Timing. Riverhead Books.'
+        },
+        amabile: {
+            title: 'The Progress Principle',
+            finding: 'Visible progress on meaningful work is the single most powerful driver of motivation and positive inner work life. Tracking and displaying small wins strengthens persistence.',
+            full: 'Amabile, T., & Kramer, S. (2011). The Progress Principle: Using Small Wins to Ignite Joy, Engagement, and Creativity at Work. Harvard Business Review Press.'
+        },
+        freedman: {
+            title: 'Foot-in-the-Door Effect',
+            finding: 'Starting with a small, easy commitment dramatically increases compliance with a larger subsequent request. Breaking a task into progressive micro-steps exploits this effect on yourself.',
+            full: 'Freedman, J. L., & Fraser, S. C. (1966). Compliance without pressure: The foot-in-the-door technique. Journal of Personality and Social Psychology, 4(2), 195–202.'
+        },
+        zeigarnik: {
+            title: 'The Zeigarnik Effect',
+            finding: 'The brain creates mental tension around unfinished tasks and works harder to recall and complete them. Starting — even briefly — activates this pull and reduces avoidance.',
+            full: 'Zeigarnik, B. (1927). On finished and unfinished tasks. Psychologische Forschung, 9, 1–85.'
+        },
+        gailliot: {
+            title: 'Self-Regulation Depletion',
+            finding: 'Self-control draws on limited resources that are depleted by fighting distractions. Pre-emptively removing distractions preserves capacity for the task itself.',
+            full: 'Gailliot, M. T., & Baumeister, R. F. (2007). The physiology of willpower. Personality and Social Psychology Review, 11(4), 303–327.'
+        },
+    };
+
+    const FEATURES = [
+        { id: 'scheduled', title: 'Scheduling a specific time', body: 'Setting a specific date and time to work on a task — not just a deadline — transforms a vague wish into a binding plan. This is known as an <strong>implementation intention</strong>.', cites: ['gollwitzer', 'steel'] },
+        { id: 'firstaction', title: 'Defining the first action', body: 'Vague tasks ("work on project") stay on the list. Specific first actions ("open the doc and write one sentence") get done. Breaking tasks into a single clear starting step lowers the activation threshold.', cites: ['freedman', 'zeigarnik'] },
+        { id: 'donelooks', title: 'Defining what "done" looks like', body: 'Without a clear endpoint, work expands and rumination sets in. Stating explicitly what completion looks like gives your brain a target and a stopping signal.', cites: ['locke'] },
+        { id: 'obstacle', title: 'Naming the obstacle', body: 'Anticipating what will get in the way — in advance — doubles follow-through. This is the core finding of WOOP (Wish, Outcome, Obstacle, Plan), one of the most studied interventions in behavioural science.', cites: ['oettingen'] },
+        { id: 'location', title: 'Choosing your location', body: 'Environmental cues drive behaviour more reliably than willpower. Deciding in advance where you will work makes starting automatic rather than effortful.', cites: ['newport'] },
+        { id: 'distraction', title: 'Identifying distractions', body: 'Naming distractions you expect depletes their power. Pre-committing to how you will handle them preserves the mental energy you need for the task itself.', cites: ['gailliot', 'newport'] },
+        { id: 'sharpest', title: 'Matching tasks to your peak time', body: 'Cognitive performance follows a daily rhythm unique to you. Scheduling demanding work during your personal peak hours measurably improves quality.', cites: ['pink'] },
+        { id: 'progressive', title: 'Progressive task creation', body: 'Revealing the form one step at a time — rather than as a daunting wall — exploits the foot-in-the-door effect. Each small commitment increases the likelihood of completing the next.', cites: ['freedman'] },
+        { id: 'readywork', title: 'Ready to Work mode', body: 'A short environmental checklist before working primes focus and removes the decisions that drain self-regulation. This is the same principle elite performers use before deep work or competition.', cites: ['newport', 'gailliot'] },
+        { id: 'progress', title: 'Tracking progress visibly', body: 'Small visible wins are the strongest day-to-day driver of motivation. Seeing your own progress activates reward circuits and strengthens persistence on future tasks.', cites: ['amabile', 'steel'] },
+    ];
+
+    // ════════════════════════════════════════════════════════════════
+    // STATE + STORAGE
+    // ════════════════════════════════════════════════════════════════
+
+    const STORAGE_KEY = 'inertia_state_v1';
+
+    function loadState() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) return JSON.parse(raw);
+        } catch (e) {}
+        return {
+            tasks: [],
+            visits: 0,
+            memberSince: new Date().toISOString(),
+            focusSessions: [],
+        };
+    }
+
+    function saveState() {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+    }
+
+    const state = loadState();
+    state.visits = (state.visits || 0) + 1;
+    if (!state.memberSince) state.memberSince = new Date().toISOString();
+    if (!state.focusSessions) state.focusSessions = [];
+    saveState();
+
+    let editingId = null;
+    const calState = {
+        schedule: { year: 0, month: 0, selected: null },
+        deadline: { year: 0, month: 0, selected: null },
+    };
+
+    // ════════════════════════════════════════════════════════════════
+    // NAVIGATION / MENU
+    // ════════════════════════════════════════════════════════════════
+
+    const hamburger    = document.getElementById('hamburger');
+    const sideMenu     = document.getElementById('sideMenu');
+    const menuBackdrop = document.getElementById('menuBackdrop');
+
+    function toggleMenu(open) {
+        const o = open !== undefined ? open : !sideMenu.classList.contains('open');
+        sideMenu.classList.toggle('open', o);
+        menuBackdrop.classList.toggle('open', o);
+        hamburger.classList.toggle('open', o);
+    }
+
+    hamburger.addEventListener('click', () => toggleMenu());
+    menuBackdrop.addEventListener('click', () => toggleMenu(false));
+
+    function switchView(name) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById('view-' + name).classList.add('active');
+        document.querySelectorAll('.menu-item').forEach(m => {
+            m.classList.toggle('active', m.dataset.view === name);
+        });
+        toggleMenu(false);
+        window.scrollTo(0, 0);
+
+        if (name === 'stats')   renderStats();
+        if (name === 'ready')   renderReady();
+        if (name === 'science') renderScience();
+    }
+
+    document.querySelectorAll('.menu-item').forEach(btn => {
+        btn.addEventListener('click', () => switchView(btn.dataset.view));
+    });
+
+    // ════════════════════════════════════════════════════════════════
+    // TASK CREATION FLOW
+    // ════════════════════════════════════════════════════════════════
+
+    const STEPS = ['title','category','action','schedule','deadline','priority','location','distraction','time','obstacle','done'];
+    const addButton  = document.getElementById('addButton');
+    const inlineForm = document.getElementById('inlineForm');
+    const formFooter = document.getElementById('formFooter');
+    const btnDiscard = document.getElementById('btnDiscard');
+    const btnSave    = document.getElementById('btnSave');
+
+    function openForm(task) {
+        editingId = task ? task.id : null;
+        addButton.classList.add('open');
+        inlineForm.classList.add('open');
+
+        STEPS.forEach(s => {
+            const el = document.getElementById('step-' + s);
+            el.classList.remove('visible');
+            el.querySelectorAll('.chip').forEach(c => {
+                if (s !== 'priority') c.classList.remove('selected');
+            });
+        });
+        document.getElementById('step-priority').querySelectorAll('.chip').forEach(c => {
+            c.classList.toggle('selected', c.dataset.value === 'medium');
+        });
+        ['inputTitle','inputAction','inputLocation','inputDistraction','inputObstacle','inputDone'].forEach(id => {
+            document.getElementById(id).value = '';
+        });
+        calState.schedule.selected = null;
+        calState.deadline.selected = null;
+        const now = new Date();
+        calState.schedule.year = now.getFullYear();
+        calState.schedule.month = now.getMonth();
+        calState.deadline.year = now.getFullYear();
+        calState.deadline.month = now.getMonth();
+        buildCalendar('schedule');
+        buildCalendar('deadline');
+
+        formFooter.classList.remove('visible');
+
+        if (task) {
+            document.getElementById('inputTitle').value       = task.title || '';
+            document.getElementById('inputAction').value      = task.firstAction || '';
+            document.getElementById('inputLocation').value    = task.location || '';
+            document.getElementById('inputDistraction').value = task.distraction || '';
+            document.getElementById('inputObstacle').value    = task.obstacle || '';
+            document.getElementById('inputDone').value        = task.doneLooks || '';
+            if (task.category)     selectChip('chipsCategory', task.category);
+            if (task.priority)     selectChip('chipsPriority', task.priority);
+            if (task.sharpestTime) selectChip('chipsSharpTime', task.sharpestTime);
+            updateActionChips(task.category);
+            updateDoneChips(task.category);
+            if (task.firstAction) selectChip('chipsAction', task.firstAction);
+            if (task.doneLooks)   selectChip('chipsDone', task.doneLooks);
+            if (task.scheduledFor) {
+                const d = new Date(task.scheduledFor);
+                calState.schedule.selected = d;
+                calState.schedule.year  = d.getFullYear();
+                calState.schedule.month = d.getMonth();
+                const t12 = to12Hour(d.getHours());
+                document.getElementById('timeHour').value   = String(t12.hour);
+                document.getElementById('timeAmPm').value   = t12.ampm;
+                document.getElementById('timeMinute').value = String(Math.floor(d.getMinutes()/15)*15).padStart(2,'0');
+                buildCalendar('schedule');
+            }
+            if (task.dueDate) {
+                const d = new Date(task.dueDate + 'T00:00:00');
+                calState.deadline.selected = d;
+                calState.deadline.year  = d.getFullYear();
+                calState.deadline.month = d.getMonth();
+                buildCalendar('deadline');
+            }
+            STEPS.forEach(s => document.getElementById('step-' + s).classList.add('visible'));
+            formFooter.classList.add('visible');
+        } else {
+            document.getElementById('step-title').classList.add('visible');
+            document.getElementById('inputTitle').focus();
+        }
+    }
+
+    function closeForm() {
+        editingId = null;
+        addButton.classList.remove('open');
+        inlineForm.classList.remove('open');
+    }
+
+    function revealStep(id) {
+        const el = document.getElementById('step-' + id);
+        el.classList.add('visible');
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        const inp = el.querySelector('.step-input, .chip-custom');
+        if (inp && inp.tagName === 'INPUT') setTimeout(() => inp.focus(), 50);
+        if (id === 'done') formFooter.classList.add('visible');
+    }
+    function nextAfter(cur) {
+        const i = STEPS.indexOf(cur);
+        if (i < STEPS.length - 1) revealStep(STEPS[i + 1]);
+        else formFooter.classList.add('visible');
+    }
+
+    function selectChip(gid, value) {
+        const g = document.getElementById(gid);
+        if (!g) return;
+        g.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+        const chip = [...g.querySelectorAll('.chip')].find(c => c.dataset.value === value);
+        if (chip) chip.classList.add('selected');
+    }
+    function getChipValue(gid) {
+        return [...document.querySelectorAll('#' + gid + ' .chip.selected')].map(c => c.dataset.value).join(', ');
+    }
+    function setupSingle(gid, after) {
+        const g = document.getElementById(gid); if (!g) return;
+        g.addEventListener('click', e => {
+            const chip = e.target.closest('.chip'); if (!chip) return;
+            g.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+            chip.classList.add('selected');
+            if (after) setTimeout(after, 180);
+        });
+    }
+    function setupMulti(gid) {
+        const g = document.getElementById(gid); if (!g) return;
+        g.addEventListener('click', e => {
+            const chip = e.target.closest('.chip'); if (!chip) return;
+            chip.classList.toggle('selected');
+        });
+    }
+
+    function updateActionChips(cat) {
+        const g = document.getElementById('chipsAction');
+        const list = FIRST_ACTIONS[cat] || FIRST_ACTIONS.other;
+        g.innerHTML = '';
+        list.forEach(a => {
+            const b = document.createElement('button');
+            b.type='button'; b.className='chip'; b.dataset.value=a; b.textContent=a;
+            g.appendChild(b);
+        });
+    }
+    function updateDoneChips(cat) {
+        const g = document.getElementById('chipsDone');
+        const list = DONE_LOOKS[cat] || DONE_LOOKS.other;
+        g.innerHTML = '';
+        list.forEach(a => {
+            const b = document.createElement('button');
+            b.type='button'; b.className='chip'; b.dataset.value=a; b.textContent=a;
+            g.appendChild(b);
+        });
+    }
+
+    // Calendar
+    function buildCalendar(which) {
+        const s = calState[which];
+        const gid = which === 'schedule' ? 'calGrid' : 'dlCalGrid';
+        const lid = which === 'schedule' ? 'calMonthYear' : 'dlCalMonthYear';
+        const now = new Date();
+        document.getElementById(lid).textContent =
+            new Date(s.year, s.month, 1).toLocaleDateString([], { month: 'long', year: 'numeric' });
+        const grid = document.getElementById(gid);
+        grid.innerHTML = '';
+        ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(d => {
+            const n = document.createElement('div');
+            n.className='cal-day-name'; n.textContent=d; grid.appendChild(n);
+        });
+        const first = new Date(s.year, s.month, 1).getDay();
+        const days  = new Date(s.year, s.month + 1, 0).getDate();
+        for (let i=0;i<first;i++) {
+            const e = document.createElement('button');
+            e.className='cal-day empty'; e.disabled=true; grid.appendChild(e);
+        }
+        for (let d=1; d<=days; d++) {
+            const btn = document.createElement('button');
+            btn.type='button';
+            const date = new Date(s.year, s.month, d);
+            const isPast = date < new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const isToday = date.toDateString() === now.toDateString();
+            const isSel = s.selected && date.toDateString() === s.selected.toDateString();
+            btn.className = 'cal-day' + (isPast?' past':'') + (isToday?' today':'') + (isSel?' selected':'');
+            btn.textContent = d;
+            if (!isPast) {
+                btn.addEventListener('click', () => {
+                    s.selected = date;
+                    buildCalendar(which);
+                    nextAfter(which === 'schedule' ? 'schedule' : 'deadline');
+                });
+            }
+            grid.appendChild(btn);
+        }
+    }
+
+    function buildTimeSelects() {
+        const h = document.getElementById('timeHour');
+        const m = document.getElementById('timeMinute');
+        const p = document.getElementById('timeAmPm');
+        const now = new Date();
+        const cur12 = now.getHours() % 12 === 0 ? 12 : now.getHours() % 12;
+        for (let i=1;i<=12;i++) {
+            const o = document.createElement('option');
+            o.value=String(i); o.textContent=String(i);
+            if (i === cur12) o.selected = true;
+            h.appendChild(o);
+        }
+        [0,15,30,45].forEach(v => {
+            const o = document.createElement('option');
+            o.value = String(v).padStart(2,'0');
+            o.textContent = String(v).padStart(2,'0');
+            m.appendChild(o);
+        });
+        p.value = now.getHours() >= 12 ? 'PM' : 'AM';
+    }
+    function to24Hour(h12, ampm) {
+        let h = parseInt(h12);
+        if (ampm === 'AM') return h === 12 ? 0 : h;
+        return h === 12 ? 12 : h + 12;
+    }
+    function to12Hour(h24) {
+        return { hour: h24 % 12 === 0 ? 12 : h24 % 12, ampm: h24 >= 12 ? 'PM' : 'AM' };
+    }
+
+    // Save task
+    function saveTask() {
+        const title = document.getElementById('inputTitle').value.trim();
+        if (!title) return;
+
+        let scheduledFor = '';
+        if (calState.schedule.selected) {
+            const d = new Date(calState.schedule.selected);
+            d.setHours(
+                to24Hour(document.getElementById('timeHour').value, document.getElementById('timeAmPm').value),
+                parseInt(document.getElementById('timeMinute').value)
+            );
+            scheduledFor = d.toISOString();
+        }
+        let dueDate = '';
+        if (calState.deadline.selected) {
+            const d = calState.deadline.selected;
+            dueDate = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        }
+
+        const existing = editingId ? state.tasks.find(t => t.id === editingId) : null;
+        const task = {
+            id:           editingId || Date.now(),
+            title,
+            firstAction:  getChipValue('chipsAction') || document.getElementById('inputAction').value.trim(),
+            category:     getChipValue('chipsCategory') || 'other',
+            priority:     getChipValue('chipsPriority') || 'medium',
+            location:     getChipValue('chipsLocation') || document.getElementById('inputLocation').value.trim(),
+            distraction:  [getChipValue('chipsDistraction'), document.getElementById('inputDistraction').value.trim()].filter(Boolean).join(', '),
+            sharpestTime: getChipValue('chipsSharpTime'),
+            obstacle:     getChipValue('chipsObstacle') || document.getElementById('inputObstacle').value.trim(),
+            doneLooks:    getChipValue('chipsDone') || document.getElementById('inputDone').value.trim(),
+            scheduledFor,
+            dueDate,
+            createdAt:    existing ? existing.createdAt : Date.now(),
+            completedAt:  existing ? existing.completedAt : null,
+            status:       existing ? existing.status : 'active',
+        };
+
+        if (editingId) state.tasks = state.tasks.map(t => t.id === editingId ? task : t);
+        else {
+            state.tasks.push(task);
+            scheduleNotification(task);
+        }
+        saveState();
+        renderTasks();
+        closeForm();
+    }
+
+    // Render tasks
+    const taskList = document.getElementById('taskList');
+    function getDeadlineLabel(dueDate) {
+        if (!dueDate) return null;
+        const diff = Math.ceil((new Date(dueDate) - new Date()) / 86400000);
+        if (diff < 0)   return { text: 'Overdue',           style: 'overdue' };
+        if (diff === 0) return { text: 'Due today',         style: 'urgent'  };
+        if (diff === 1) return { text: '1 day left',        style: 'urgent'  };
+        if (diff <= 3)  return { text: diff + ' days left', style: 'urgent'  };
+        return                 { text: diff + ' days left', style: ''        };
+    }
+    function getScheduledLabel(s) {
+        if (!s) return null;
+        const date = new Date(s);
+        const now = new Date();
+        const tom = new Date(now); tom.setDate(now.getDate()+1);
+        const t = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+        if (date.toDateString() === now.toDateString()) return 'Today ' + t;
+        if (date.toDateString() === tom.toDateString()) return 'Tomorrow ' + t;
+        return date.toLocaleDateString([], { weekday:'short', month:'short', day:'numeric' }) + ' ' + t;
+    }
+
+    function renderTasks() {
+        taskList.innerHTML = '';
+        if (!state.tasks.length) {
+            taskList.innerHTML = '<div class="empty-state"><p>No tasks yet. Tap the button above to add one.</p></div>';
+            return;
+        }
+        const order = { high:0, medium:1, low:2 };
+        [...state.tasks].sort((a,b) => {
+            if (a.status==='completed' && b.status!=='completed') return 1;
+            if (a.status!=='completed' && b.status==='completed') return -1;
+            return order[a.priority] - order[b.priority];
+        }).forEach(task => {
+            const li = document.createElement('li');
+            li.className = 'task-card priority-' + task.priority + (task.status==='completed' ? ' completed' : '');
+
+            const hdr = document.createElement('div'); hdr.className = 'task-header';
+            const ttl = document.createElement('div'); ttl.className = 'task-title'; ttl.textContent = task.title;
+            ttl.addEventListener('click', () => toggleComplete(task.id));
+
+            const acts = document.createElement('div'); acts.className = 'task-actions';
+            if (task.status !== 'completed') {
+                const focusBtn = document.createElement('button');
+                focusBtn.className = 'task-btn focus'; focusBtn.textContent = 'Focus';
+                focusBtn.addEventListener('click', e => { e.stopPropagation(); startReadyMode(task.id); });
+                acts.appendChild(focusBtn);
+            }
+            const edt = document.createElement('button');
+            edt.className = 'task-btn'; edt.textContent = 'Edit';
+            edt.addEventListener('click', e => { e.stopPropagation(); openForm(task); });
+            acts.appendChild(edt);
+
+            hdr.appendChild(ttl); hdr.appendChild(acts); li.appendChild(hdr);
+
+            if (task.firstAction) {
+                const a = document.createElement('div');
+                a.className = 'task-first-action';
+                a.textContent = '→ ' + task.firstAction;
+                a.addEventListener('click', () => toggleComplete(task.id));
+                li.appendChild(a);
+            }
+
+            const meta = document.createElement('div'); meta.className = 'task-meta';
+            const sl = getScheduledLabel(task.scheduledFor);
+            if (sl) { const t=document.createElement('span'); t.className='meta-tag meta-scheduled'; t.textContent='📅 '+sl; meta.appendChild(t); }
+            const dl = getDeadlineLabel(task.dueDate);
+            if (dl) { const t=document.createElement('span'); t.className='meta-tag meta-deadline '+dl.style; t.textContent='⏰ '+dl.text; meta.appendChild(t); }
+            if (task.category) { const t=document.createElement('span'); t.className='meta-tag meta-category'; t.textContent=task.category; meta.appendChild(t); }
+            if (task.location) { const t=document.createElement('span'); t.className='meta-tag meta-context'; t.textContent='📍 '+task.location; meta.appendChild(t); }
+            if (task.obstacle) { const t=document.createElement('span'); t.className='meta-tag meta-context'; t.textContent='⚠️ '+task.obstacle; meta.appendChild(t); }
+            li.appendChild(meta);
+
+            taskList.appendChild(li);
+        });
+    }
+
+    function toggleComplete(id) {
+        const t = state.tasks.find(x => x.id === id);
+        if (!t) return;
+        t.status = t.status === 'completed' ? 'active' : 'completed';
+        t.completedAt = t.status === 'completed' ? Date.now() : null;
+        saveState();
+        renderTasks();
+    }
+
+    // Notifications
+    function requestNotificationPermission() {
+        if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+    }
+    function scheduleNotification(task) {
+        if (!task.scheduledFor || !('Notification' in window) || Notification.permission !== 'granted') return;
+        const delay = new Date(task.scheduledFor).getTime() - Date.now();
+        if (delay <= 0) return;
+        setTimeout(() => new Notification('Time to work: ' + task.title, { body: task.firstAction || 'Your session is starting.' }), delay);
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // READY TO WORK
+    // ════════════════════════════════════════════════════════════════
+
+    const readyState = { taskId: null, mode: 'simple', checked: [], timer: null, timeLeft: 0, running: false, duration: 25 };
+
+    function startReadyMode(taskId) {
+        readyState.taskId = taskId;
+        readyState.mode = 'simple';
+        readyState.checked = [];
+        readyState.timer = null;
+        readyState.running = false;
+        readyState.duration = 25;
+        readyState.timeLeft = 25 * 60;
+        switchView('ready');
+    }
+
+    function renderReady() {
+        const container = document.getElementById('readyContent');
+        container.innerHTML = '';
+
+        const task = readyState.taskId ? state.tasks.find(t => t.id === readyState.taskId) : null;
+
+        if (!task) {
+            // Show list of active tasks to pick from
+            const note = document.createElement('div');
+            note.className = 'empty-state';
+            note.innerHTML = '<p>Pick an active task to focus on:</p>';
+            container.appendChild(note);
+
+            const list = document.createElement('ul');
+            list.className = 'task-list';
+            state.tasks.filter(t => t.status !== 'completed').forEach(t => {
+                const li = document.createElement('li');
+                li.className = 'task-card priority-' + t.priority;
+                li.style.cursor = 'pointer';
+                li.innerHTML = '<div class="task-title">' + escapeHtml(t.title) + '</div>' +
+                    (t.firstAction ? '<div class="task-first-action">→ ' + escapeHtml(t.firstAction) + '</div>' : '');
+                li.addEventListener('click', () => startReadyMode(t.id));
+                list.appendChild(li);
+            });
+            container.appendChild(list);
+            return;
+        }
+
+        // Task intro
+        const intro = document.createElement('div');
+        intro.className = 'ready-intro';
+        intro.innerHTML = '<div class="ready-task">' + escapeHtml(task.title) + '</div>' +
+            (task.firstAction ? '<div class="ready-action">→ ' + escapeHtml(task.firstAction) + '</div>' : '');
+        container.appendChild(intro);
+
+        if (readyState.mode === 'simple' || readyState.mode === 'guided') {
+            renderEnvironmentCheck(container, task);
+        } else if (readyState.mode === 'breathing') {
+            renderBreathing(container);
+        } else if (readyState.mode === 'intention') {
+            renderIntention(container, task);
+        } else if (readyState.mode === 'timer') {
+            renderTimer(container, task);
+        }
+    }
+
+    function renderEnvironmentCheck(container, task) {
+        const label = document.createElement('div');
+        label.className = 'section-title'; label.textContent = 'Environment check';
+        container.appendChild(label);
+
+        const items = [
+            { id: 'phone', text: 'Phone silenced and out of reach' },
+            { id: 'notifs', text: 'Notifications off on this device' },
+            { id: 'water', text: 'Water nearby' },
+            { id: 'desk', text: 'Clear workspace' },
+        ];
+        if (task.distraction) items.push({ id: 'dist', text: 'Handled: ' + task.distraction });
+
+        const list = document.createElement('ul'); list.className = 'check-list';
+        items.forEach(it => {
+            const li = document.createElement('li');
+            li.className = 'check-item' + (readyState.checked.includes(it.id) ? ' checked' : '');
+            li.innerHTML = '<div class="check-box">✓</div><div class="check-text">' + escapeHtml(it.text) + '</div>';
+            li.addEventListener('click', () => {
+                const i = readyState.checked.indexOf(it.id);
+                if (i >= 0) readyState.checked.splice(i, 1);
+                else readyState.checked.push(it.id);
+                renderReady();
+            });
+            list.appendChild(li);
+        });
+        container.appendChild(list);
+
+        const allChecked = items.every(it => readyState.checked.includes(it.id));
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'btn-big';
+        nextBtn.textContent = readyState.mode === 'guided' ? 'Continue →' : 'Start Focus Session';
+        nextBtn.disabled = !allChecked;
+        nextBtn.addEventListener('click', () => {
+            if (readyState.mode === 'guided') { readyState.mode = 'breathing'; renderReady(); }
+            else { readyState.mode = 'timer'; renderReady(); }
+        });
+        container.appendChild(nextBtn);
+
+        if (readyState.mode === 'simple') {
+            const alt = document.createElement('button');
+            alt.className = 'btn-secondary';
+            alt.textContent = 'Use full guided routine instead';
+            alt.addEventListener('click', () => { readyState.mode = 'guided'; renderReady(); });
+            container.appendChild(alt);
+        }
+    }
+
+    function renderBreathing(container) {
+        const label = document.createElement('div');
+        label.className = 'section-title'; label.textContent = 'Settle in';
+        container.appendChild(label);
+
+        const box = document.createElement('div');
+        box.className = 'timer-display';
+        box.innerHTML = '<div class="timer-time" id="breathCount">30</div>' +
+            '<div class="timer-label">Breathe slowly. In through the nose, out through the mouth.</div>';
+        container.appendChild(box);
+
+        let secs = 30;
+        const tick = setInterval(() => {
+            secs--;
+            const el = document.getElementById('breathCount');
+            if (el) el.textContent = secs;
+            if (secs <= 0) { clearInterval(tick); readyState.mode = 'intention'; renderReady(); }
+        }, 1000);
+
+        const skip = document.createElement('button');
+        skip.className = 'btn-secondary'; skip.textContent = 'Skip';
+        skip.addEventListener('click', () => { clearInterval(tick); readyState.mode = 'intention'; renderReady(); });
+        container.appendChild(skip);
+    }
+
+    function renderIntention(container, task) {
+        const label = document.createElement('div');
+        label.className = 'section-title'; label.textContent = 'State your intention';
+        container.appendChild(label);
+
+        const intro = document.createElement('div');
+        intro.className = 'ready-intro';
+        intro.innerHTML = '<p style="color:#b5c5b9;font-size:14px;margin-bottom:12px">Say this out loud, or clearly in your head:</p>' +
+            '<div class="ready-task" style="font-size:18px">"I am going to ' + escapeHtml(task.firstAction || task.title) + '."</div>';
+        container.appendChild(intro);
+
+        const btn = document.createElement('button');
+        btn.className = 'btn-big'; btn.textContent = 'Start Focus Session';
+        btn.addEventListener('click', () => { readyState.mode = 'timer'; renderReady(); });
+        container.appendChild(btn);
+    }
+
+    function renderTimer(container, task) {
+        const label = document.createElement('div');
+        label.className = 'section-title'; label.textContent = 'Focus';
+        container.appendChild(label);
+
+        const durRow = document.createElement('div');
+        durRow.className = 'timer-duration';
+        [15, 25, 50, 90].forEach(d => {
+            const b = document.createElement('button');
+            b.className = 'chip' + (readyState.duration === d ? ' selected' : '');
+            b.textContent = d + ' min';
+            b.addEventListener('click', () => {
+                if (readyState.running) return;
+                readyState.duration = d;
+                readyState.timeLeft = d * 60;
+                renderReady();
+            });
+            durRow.appendChild(b);
+        });
+        container.appendChild(durRow);
+
+        const display = document.createElement('div');
+        display.className = 'timer-display';
+        const mm = String(Math.floor(readyState.timeLeft / 60)).padStart(2,'0');
+        const ss = String(readyState.timeLeft % 60).padStart(2,'0');
+        display.innerHTML = '<div class="timer-time">' + mm + ':' + ss + '</div>' +
+            '<div class="timer-label">' + (readyState.running ? 'Focused work' : 'Ready when you are') + '</div>';
+        container.appendChild(display);
+
+        const controls = document.createElement('div'); controls.className = 'timer-controls';
+        const play = document.createElement('button');
+        play.className = 'btn-big'; play.style.marginBottom = '0';
+        play.textContent = readyState.running ? 'Pause' : (readyState.timeLeft === readyState.duration*60 ? 'Start' : 'Resume');
+        play.addEventListener('click', toggleTimer);
+        controls.appendChild(play);
+        container.appendChild(controls);
+
+        const done = document.createElement('button');
+        done.className = 'btn-secondary'; done.textContent = 'Finish — mark task complete';
+        done.addEventListener('click', () => {
+            stopTimer();
+            const taskId = readyState.taskId;
+            state.focusSessions.push({
+                taskId, minutes: Math.round((readyState.duration*60 - readyState.timeLeft)/60), at: Date.now()
+            });
+            const t = state.tasks.find(x => x.id === taskId);
+            if (t) { t.status = 'completed'; t.completedAt = Date.now(); }
+            saveState();
+            readyState.taskId = null;
+            switchView('home');
+        });
+        container.appendChild(done);
+    }
+
+    function toggleTimer() {
+        if (readyState.running) stopTimer();
+        else startTimer();
+        renderReady();
+    }
+    function startTimer() {
+        readyState.running = true;
+        readyState.timer = setInterval(() => {
+            readyState.timeLeft--;
+            if (readyState.timeLeft <= 0) {
+                stopTimer();
+                state.focusSessions.push({
+                    taskId: readyState.taskId, minutes: readyState.duration, at: Date.now()
+                });
+                saveState();
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    new Notification('Focus session complete', { body: 'Great work. Take a short break.' });
+                }
+            }
+            const el = document.querySelector('#view-ready .timer-time');
+            if (el) {
+                const mm = String(Math.floor(readyState.timeLeft / 60)).padStart(2,'0');
+                const ss = String(readyState.timeLeft % 60).padStart(2,'0');
+                el.textContent = mm + ':' + ss;
+            }
+        }, 1000);
+    }
+    function stopTimer() {
+        readyState.running = false;
+        if (readyState.timer) { clearInterval(readyState.timer); readyState.timer = null; }
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // STATS
+    // ════════════════════════════════════════════════════════════════
+
+    function renderStats() {
+        const c = document.getElementById('statsContent');
+        c.innerHTML = '';
+        const tasks = state.tasks;
+        const completed = tasks.filter(t => t.status === 'completed');
+        const pct = tasks.length ? Math.round((completed.length / tasks.length) * 100) : 0;
+
+        // Top grid
+        const grid = document.createElement('div');
+        grid.className = 'stats-grid';
+
+        grid.appendChild(statCard(completed.length, 'Tasks completed'));
+        grid.appendChild(statCard(tasks.filter(t => t.status === 'active').length, 'Active'));
+
+        const onTime = completed.filter(t => t.dueDate && t.completedAt && new Date(t.completedAt) <= new Date(t.dueDate + 'T23:59:59')).length;
+        const dueTotal = completed.filter(t => t.dueDate).length;
+        const onTimePct = dueTotal ? Math.round((onTime / dueTotal) * 100) : 0;
+        grid.appendChild(statCard(onTimePct + '%', 'On-time rate'));
+
+        const focusMin = state.focusSessions.reduce((a,s) => a + (s.minutes||0), 0);
+        grid.appendChild(statCard(focusMin, 'Focus minutes'));
+
+        c.appendChild(grid);
+
+        // Overall completion
+        const overall = document.createElement('div');
+        overall.className = 'stat-card';
+        overall.style.marginBottom = '24px';
+        overall.innerHTML =
+            '<div class="stat-label">Overall completion</div>' +
+            '<div class="stat-value" style="margin-top:6px">' + pct + '%</div>' +
+            '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
+            '<div class="stat-sub">' + completed.length + ' of ' + tasks.length + ' tasks</div>';
+        c.appendChild(overall);
+
+        // Streak
+        const streak = computeStreak(completed);
+        const streakCard = document.createElement('div');
+        streakCard.className = 'stat-card';
+        streakCard.style.marginBottom = '24px';
+        streakCard.innerHTML =
+            '<div class="stat-label">Current streak</div>' +
+            '<div class="stat-value" style="margin-top:6px">' + streak + ' day' + (streak===1?'':'s') + '</div>' +
+            '<div class="stat-sub">' + (streak ? 'Keep going — progress compounds.' : 'Complete a task today to start a streak.') + '</div>';
+        c.appendChild(streakCard);
+
+        // Category breakdown
+        const catLabel = document.createElement('div');
+        catLabel.className = 'section-title'; catLabel.textContent = 'By category';
+        c.appendChild(catLabel);
+
+        const catCard = document.createElement('div');
+        catCard.className = 'stat-card';
+        catCard.style.marginBottom = '24px';
+        const cats = {};
+        tasks.forEach(t => {
+            const k = t.category || 'other';
+            cats[k] = cats[k] || { total: 0, done: 0 };
+            cats[k].total++;
+            if (t.status === 'completed') cats[k].done++;
+        });
+        Object.keys(cats).sort((a,b) => cats[b].total - cats[a].total).forEach(k => {
+            const row = document.createElement('div');
+            row.className = 'category-row';
+            const p = cats[k].total ? Math.round((cats[k].done/cats[k].total)*100) : 0;
+            row.innerHTML = '<span class="category-name">' + k + '</span>' +
+                '<span class="category-stat">' + cats[k].done + '/' + cats[k].total + ' · ' + p + '%</span>';
+            catCard.appendChild(row);
+        });
+        if (!Object.keys(cats).length) catCard.innerHTML = '<div style="color:#3a5040;font-size:13px">No tasks yet.</div>';
+        c.appendChild(catCard);
+
+        // Behavioral insights
+        const insLabel = document.createElement('div');
+        insLabel.className = 'section-title'; insLabel.textContent = 'What the data says about you';
+        c.appendChild(insLabel);
+
+        c.appendChild(insight('Most productive time of day', mostProductiveTime(completed), 'Based on when you\'ve completed tasks.'));
+        c.appendChild(insight('Most common obstacle', mostCommon(tasks, 'obstacle'), 'The friction that appears most often in your tasks.'));
+        c.appendChild(insight('Most common distraction', mostCommon(tasks, 'distraction'), 'What tends to pull your attention.'));
+        c.appendChild(insight('Category you complete most', bestCategory(tasks), 'You finish these reliably.'));
+        c.appendChild(insight('Category you avoid most', worstCategory(tasks), 'These get created but sit on the list.'));
+    }
+
+    function statCard(value, label) {
+        const d = document.createElement('div');
+        d.className = 'stat-card';
+        d.innerHTML = '<div class="stat-value">' + value + '</div><div class="stat-label">' + label + '</div>';
+        return d;
+    }
+    function insight(label, value, note) {
+        const d = document.createElement('div');
+        d.className = 'insight-card';
+        d.innerHTML = '<div class="insight-label">' + label + '</div>' +
+            '<div class="insight-value">' + (value || 'Not enough data yet') + '</div>' +
+            '<div class="insight-note">' + note + '</div>';
+        return d;
+    }
+
+    function computeStreak(completed) {
+        if (!completed.length) return 0;
+        const days = new Set(completed.map(t => new Date(t.completedAt).toDateString()));
+        let streak = 0;
+        let d = new Date();
+        if (!days.has(d.toDateString())) d.setDate(d.getDate() - 1);
+        while (days.has(d.toDateString())) {
+            streak++;
+            d.setDate(d.getDate() - 1);
+        }
+        return streak;
+    }
+    function mostProductiveTime(completed) {
+        if (completed.length < 2) return null;
+        const buckets = { 'Early morning': 0, 'Mid-morning': 0, 'Afternoon': 0, 'Evening': 0, 'Late night': 0 };
+        completed.forEach(t => {
+            const h = new Date(t.completedAt).getHours();
+            if (h < 8) buckets['Early morning']++;
+            else if (h < 12) buckets['Mid-morning']++;
+            else if (h < 17) buckets['Afternoon']++;
+            else if (h < 22) buckets['Evening']++;
+            else buckets['Late night']++;
+        });
+        return Object.entries(buckets).sort((a,b) => b[1]-a[1])[0][0];
+    }
+    function mostCommon(tasks, field) {
+        const counts = {};
+        tasks.forEach(t => {
+            (t[field] || '').split(', ').filter(Boolean).forEach(v => { counts[v] = (counts[v]||0)+1; });
+        });
+        const entries = Object.entries(counts).sort((a,b) => b[1]-a[1]);
+        return entries.length ? entries[0][0] : null;
+    }
+    function bestCategory(tasks) {
+        const cats = {};
+        tasks.forEach(t => {
+            const k = t.category || 'other';
+            cats[k] = cats[k] || { total: 0, done: 0 };
+            cats[k].total++;
+            if (t.status === 'completed') cats[k].done++;
+        });
+        const entries = Object.entries(cats).filter(([,v]) => v.total >= 2);
+        if (!entries.length) return null;
+        entries.sort((a,b) => (b[1].done/b[1].total) - (a[1].done/a[1].total));
+        return entries[0][0];
+    }
+    function worstCategory(tasks) {
+        const cats = {};
+        tasks.forEach(t => {
+            const k = t.category || 'other';
+            cats[k] = cats[k] || { total: 0, done: 0 };
+            cats[k].total++;
+            if (t.status === 'completed') cats[k].done++;
+        });
+        const entries = Object.entries(cats).filter(([,v]) => v.total >= 2);
+        if (!entries.length) return null;
+        entries.sort((a,b) => (a[1].done/a[1].total) - (b[1].done/b[1].total));
+        return entries[0][0];
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // SCIENCE
+    // ════════════════════════════════════════════════════════════════
+
+    function renderScience() {
+        const list = document.getElementById('featureList');
+        list.innerHTML = '';
+        FEATURES.forEach(f => {
+            const card = document.createElement('div');
+            card.className = 'feature-card';
+
+            const head = document.createElement('div');
+            head.className = 'feature-head';
+            head.innerHTML = '<div class="feature-title">' + escapeHtml(f.title) + '</div><div class="feature-toggle">+</div>';
+            head.addEventListener('click', () => card.classList.toggle('open'));
+
+            const body = document.createElement('div');
+            body.className = 'feature-body';
+            const refs = f.cites.map(id =>
+                '<span class="citation" data-cite="' + id + '">' + CITATIONS[id].title + '</span>'
+            ).join(' · ');
+            body.innerHTML = '<p>' + f.body + '</p><p style="color:#5a8a6e;font-size:12px">References: ' + refs + '</p>';
+
+            card.appendChild(head);
+            card.appendChild(body);
+            list.appendChild(card);
+        });
+
+        document.querySelectorAll('.citation').forEach(c => {
+            c.addEventListener('click', e => {
+                e.stopPropagation();
+                openCitation(c.dataset.cite);
+            });
+        });
+    }
+
+    function openCitation(id) {
+        const cite = CITATIONS[id];
+        if (!cite) return;
+        document.getElementById('citeTitle').textContent   = cite.title;
+        document.getElementById('citeFinding').textContent = cite.finding;
+        document.getElementById('citeFull').textContent    = cite.full;
+        document.getElementById('citeOverlay').classList.add('open');
+    }
+    document.getElementById('citeClose').addEventListener('click', () => {
+        document.getElementById('citeOverlay').classList.remove('open');
+    });
+    document.getElementById('citeOverlay').addEventListener('click', e => {
+        if (e.target.id === 'citeOverlay') e.target.classList.remove('open');
+    });
+
+    // ════════════════════════════════════════════════════════════════
+    // HELPERS
+    // ════════════════════════════════════════════════════════════════
+
+    function escapeHtml(s) {
+        return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // WIRE UP
+    // ════════════════════════════════════════════════════════════════
+
+    document.getElementById('inputTitle').addEventListener('keydown', function(e) {
+        if (e.key==='Enter' && this.value.trim()) nextAfter('title');
+    });
+    setupSingle('chipsCategory', function() {
+        const cat = getChipValue('chipsCategory');
+        updateActionChips(cat);
+        updateDoneChips(cat);
+        nextAfter('category');
+    });
+    document.getElementById('inputAction').addEventListener('keydown', function(e) {
+        if (e.key==='Enter') nextAfter('action');
+    });
+    document.getElementById('chipsAction').addEventListener('click', function(e) {
+        if (e.target.closest('.chip')) setTimeout(() => nextAfter('action'), 180);
+    });
+    document.getElementById('calPrev').addEventListener('click', () => {
+        calState.schedule.month--;
+        if (calState.schedule.month < 0) { calState.schedule.month=11; calState.schedule.year--; }
+        buildCalendar('schedule');
+    });
+    document.getElementById('calNext').addEventListener('click', () => {
+        calState.schedule.month++;
+        if (calState.schedule.month > 11) { calState.schedule.month=0; calState.schedule.year++; }
+        buildCalendar('schedule');
+    });
+    document.getElementById('dlCalPrev').addEventListener('click', () => {
+        calState.deadline.month--;
+        if (calState.deadline.month < 0) { calState.deadline.month=11; calState.deadline.year--; }
+        buildCalendar('deadline');
+    });
+    document.getElementById('dlCalNext').addEventListener('click', () => {
+        calState.deadline.month++;
+        if (calState.deadline.month > 11) { calState.deadline.month=0; calState.deadline.year++; }
+        buildCalendar('deadline');
+    });
+    document.getElementById('btnSkipDeadline').addEventListener('click', () => {
+        calState.deadline.selected = null;
+        nextAfter('deadline');
+    });
+    setupSingle('chipsPriority', () => nextAfter('priority'));
+    setupSingle('chipsLocation', () => nextAfter('location'));
+    document.getElementById('inputLocation').addEventListener('keydown', e => { if (e.key==='Enter') nextAfter('location'); });
+    setupMulti('chipsDistraction');
+    document.getElementById('inputDistraction').addEventListener('keydown', e => { if (e.key==='Enter') nextAfter('distraction'); });
+    document.getElementById('chipsDistraction').addEventListener('click', () => {
+        clearTimeout(window._distTimer);
+        window._distTimer = setTimeout(() => nextAfter('distraction'), 1800);
+    });
+    setupSingle('chipsSharpTime', () => nextAfter('time'));
+    setupSingle('chipsObstacle', () => nextAfter('obstacle'));
+    document.getElementById('inputObstacle').addEventListener('keydown', e => { if (e.key==='Enter') nextAfter('obstacle'); });
+    document.getElementById('inputDone').addEventListener('keydown', e => { if (e.key==='Enter') formFooter.classList.add('visible'); });
+    document.getElementById('chipsDone').addEventListener('click', e => {
+        if (e.target.closest('.chip')) setTimeout(() => formFooter.classList.add('visible'), 180);
+    });
+
+    addButton.addEventListener('click', () => openForm(null));
+    btnDiscard.addEventListener('click', closeForm);
+    btnSave.addEventListener('click', saveTask);
+
+    // ════════════════════════════════════════════════════════════════
+    // INIT
+    // ════════════════════════════════════════════════════════════════
+
+    const now = new Date();
+    calState.schedule.year = now.getFullYear();
+    calState.schedule.month = now.getMonth();
+    calState.deadline.year = now.getFullYear();
+    calState.deadline.month = now.getMonth();
+    buildCalendar('schedule');
+    buildCalendar('deadline');
+    buildTimeSelects();
+
+    document.getElementById('todayDate').textContent = now.toLocaleDateString([], { weekday:'long', month:'long', day:'numeric' });
+    document.getElementById('visitCount').textContent = state.visits;
+    document.getElementById('memberSince').textContent = new Date(state.memberSince).toLocaleDateString([], { month: 'short', year: 'numeric' });
+
+    renderTasks();
+    requestNotificationPermission();
+
+    // Reschedule notifications for saved tasks
+    state.tasks.forEach(t => { if (t.status !== 'completed') scheduleNotification(t); });
+</script>
+</body>
+</html>
