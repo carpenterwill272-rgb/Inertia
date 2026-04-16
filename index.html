@@ -185,6 +185,51 @@
         }
         .quick-add-detail:hover { border-color: #5a8a6e; color: #d4ddd6; }
 
+        /* ── QUICK START NUDGE (amber inline bar after quick-add) ── */
+        .qs-nudge {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px; padding: 10px 14px;
+            background: rgba(212,144,58,0.06);
+            border: 1px solid rgba(212,144,58,0.25);
+            border-radius: 8px;
+            margin: -12px 0 20px;
+            animation: qsnSlide 0.25s ease-out;
+        }
+        @keyframes qsnSlide {
+            from { opacity: 0; transform: translateY(-4px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .qsn-text { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
+        .qsn-label {
+            font-size: 10px; font-weight: 600; letter-spacing: 0.08em;
+            text-transform: uppercase; color: #8b6a3a;
+            padding: 3px 8px; background: rgba(212,144,58,0.12);
+            border-radius: 4px; flex-shrink: 0;
+        }
+        .qsn-title {
+            font-size: 13px; color: #d4ddd6; font-weight: 500;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .qsn-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+        .qsn-start-btn {
+            padding: 7px 12px; font-size: 12px; font-weight: 600;
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #d4903a; color: #0e1512;
+            border: none; border-radius: 6px; cursor: pointer;
+            transition: all 0.15s;
+        }
+        .qsn-start-btn:hover {
+            background: #e0a046;
+            box-shadow: 0 2px 8px rgba(212,144,58,0.3);
+        }
+        .qsn-dismiss {
+            width: 26px; height: 26px; padding: 0;
+            font-size: 18px; line-height: 1; color: #4a6355;
+            background: transparent; border: none; border-radius: 4px;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .qsn-dismiss:hover { color: #d4ddd6; background: rgba(255,255,255,0.04); }
+
         .inline-form {
             display: none; background: #111916;
             border: 1.5px solid #1c2a1f; border-radius: 10px;
@@ -966,6 +1011,17 @@
     <div class="quick-add-wrap">
         <input class="quick-add" id="quickAdd" type="text" placeholder="+ What do you need to do?">
         <button class="quick-add-detail" id="quickAddDetail" title="Add with full detail">Add detail</button>
+    </div>
+
+    <div class="qs-nudge" id="quickStartNudge" style="display:none">
+        <div class="qsn-text">
+            <span class="qsn-label">Added</span>
+            <span class="qsn-title" id="qsnTitle"></span>
+        </div>
+        <div class="qsn-actions">
+            <button class="qsn-start-btn" id="qsnStartBtn">▸ Start now</button>
+            <button class="qsn-dismiss" id="qsnDismiss" aria-label="Dismiss">×</button>
+        </div>
     </div>
 
     <button class="btn-add" id="addButton" style="display:none">+ What do you need to do?</button>
@@ -3388,6 +3444,24 @@
     btnSave.addEventListener('click', saveTask);
 
     // Quick add — instant task from single input
+    let lastQuickAddId = null;
+    let qsnHideTimer = null;
+
+    function showQuickStartNudge(task) {
+        const nudge = document.getElementById('quickStartNudge');
+        const titleEl = document.getElementById('qsnTitle');
+        lastQuickAddId = task.id;
+        titleEl.textContent = task.title;
+        nudge.style.display = 'flex';
+        // auto-hide after 12s of inactivity
+        if (qsnHideTimer) clearTimeout(qsnHideTimer);
+        qsnHideTimer = setTimeout(hideQuickStartNudge, 12000);
+    }
+    function hideQuickStartNudge() {
+        document.getElementById('quickStartNudge').style.display = 'none';
+        if (qsnHideTimer) { clearTimeout(qsnHideTimer); qsnHideTimer = null; }
+    }
+
     document.getElementById('quickAdd').addEventListener('keydown', function(e) {
         if (e.key !== 'Enter') return;
         const title = this.value.trim();
@@ -3415,7 +3489,15 @@
         saveState();
         renderTasks();
         this.value = '';
+        showQuickStartNudge(task);
     });
+
+    // Quick start nudge button wiring
+    document.getElementById('qsnStartBtn').addEventListener('click', () => {
+        if (lastQuickAddId != null) openStartOverlay(lastQuickAddId);
+        hideQuickStartNudge();
+    });
+    document.getElementById('qsnDismiss').addEventListener('click', hideQuickStartNudge);
 
     // "Add detail" button → open full form, pre-fill title if typed
     document.getElementById('quickAddDetail').addEventListener('click', () => {
