@@ -342,6 +342,28 @@
             transition: background 0.2s;
         }
         .btn-save:hover { background: #6a9e82; }
+        .form-footer-left { display: flex; align-items: center; gap: 4px; }
+        .btn-delete {
+            font-size: 13px; color: #7a5042; background: none;
+            border: none; cursor: pointer; transition: color 0.2s;
+            font-family: 'Inter', system-ui, sans-serif;
+            padding: 6px 10px; border-radius: 6px;
+        }
+        .btn-delete:hover { color: #d47a5a; background: rgba(212,122,90,0.06); }
+        .btn-delete.confirm { color: #d47a5a; background: rgba(212,122,90,0.1); }
+        .task-btn.task-delete { color: #4a6355; padding: 2px 8px; font-size: 14px; line-height: 1; }
+        .task-btn.task-delete:hover { color: #d47a5a; }
+
+        /* ── COMPLETED TOGGLE ── */
+        .completed-toggle {
+            margin-top: 14px; padding: 8px 10px; text-align: center;
+            font-size: 11px; font-weight: 500; letter-spacing: 0.06em;
+            text-transform: uppercase; color: #4a6355;
+            background: transparent; border: 1px dashed #1c2a1f;
+            border-radius: 6px; cursor: pointer;
+            transition: all 0.15s;
+        }
+        .completed-toggle:hover { color: #d4ddd6; border-color: #2a3a2d; background: rgba(255,255,255,0.015); }
 
         /* ── TASK LIST ── */
         .task-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
@@ -1162,7 +1184,10 @@
             <input class="chip-custom" id="inputDone" type="text" placeholder="Or describe your own endpoint...">
         </div>
         <div class="form-footer" id="formFooter">
-            <button class="btn-discard" id="btnDiscard">Discard</button>
+            <div class="form-footer-left">
+                <button class="btn-discard" id="btnDiscard">Discard</button>
+                <button class="btn-delete" id="btnDelete" style="display:none">Delete</button>
+            </div>
             <button class="btn-save" id="btnSave">Save Task</button>
         </div>
     </div>
@@ -1599,6 +1624,9 @@
     }
 
     let editingId = null;
+    let _deleteConfirmId = null;
+    let _deleteConfirmTimer = null;
+    let hideCompleted = false;
     const calState = {
         schedule: { year: 0, month: 0, selected: null },
         deadline: { year: 0, month: 0, selected: null },
@@ -1678,11 +1706,15 @@
     const formFooter = document.getElementById('formFooter');
     const btnDiscard = document.getElementById('btnDiscard');
     const btnSave    = document.getElementById('btnSave');
+    const btnDelete  = document.getElementById('btnDelete');
 
     function openForm(task) {
         editingId = task ? task.id : null;
         addButton.classList.add('open');
         inlineForm.classList.add('open');
+        btnDelete.style.display = editingId ? '' : 'none';
+        btnDelete.classList.remove('confirm');
+        btnDelete.textContent = 'Delete';
 
         STEPS.forEach(s => {
             const el = document.getElementById('step-' + s);
@@ -1785,6 +1817,9 @@
         editingId = null;
         addButton.classList.remove('open');
         inlineForm.classList.remove('open');
+        btnDelete.style.display = 'none';
+        btnDelete.classList.remove('confirm');
+        btnDelete.textContent = 'Delete';
     }
 
     function revealStep(id) {
@@ -2119,11 +2154,19 @@
         renderStartCard();
         taskList.innerHTML = '';
         if (!state.tasks.length) {
-            taskList.innerHTML = '<div class="empty-state"><p>No tasks yet. Tap the button above to add one.</p></div>';
+            taskList.innerHTML = '<div class="empty-state"><p>No tasks yet. Type above and press Enter to add one.</p></div>';
+            renderCompletedToggle(0);
             return;
         }
         const order = { high:0, medium:1, low:2 };
-        [...state.tasks].sort((a,b) => {
+        const completedCount = state.tasks.filter(t => t.status === 'completed').length;
+        const visible = [...state.tasks].filter(t => !(hideCompleted && t.status === 'completed'));
+        if (!visible.length) {
+            taskList.innerHTML = '<div class="empty-state"><p>All clear. Add a task above when you\'re ready.</p></div>';
+            renderCompletedToggle(completedCount);
+            return;
+        }
+        visible.sort((a,b) => {
             if (a.status==='completed' && b.status!=='completed') return 1;
             if (a.status!=='completed' && b.status==='completed') return -1;
             return order[a.priority] - order[b.priority];
@@ -2140,6 +2183,19 @@
             edt.className = 'task-btn'; edt.textContent = 'Edit';
             edt.addEventListener('click', e => { e.stopPropagation(); openForm(task); });
             acts.appendChild(edt);
+
+            const del = document.createElement('button');
+            del.className = 'task-btn task-delete';
+            del.setAttribute('aria-label', 'Delete task');
+            if (_deleteConfirmId === task.id) {
+                del.textContent = 'Delete?';
+                del.style.color = '#d47a5a';
+                del.style.fontSize = '11px';
+            } else {
+                del.textContent = '×';
+            }
+            del.addEventListener('click', e => { e.stopPropagation(); deleteTask(task.id); });
+            acts.appendChild(del);
 
             hdr.appendChild(ttl); hdr.appendChild(acts); li.appendChild(hdr);
 
@@ -2171,6 +2227,26 @@
 
             taskList.appendChild(li);
         });
+        renderCompletedToggle(completedCount);
+    }
+
+    function renderCompletedToggle(count) {
+        let bar = document.getElementById('completedToggle');
+        if (!bar) {
+            bar = document.createElement('div');
+            bar.id = 'completedToggle';
+            bar.className = 'completed-toggle';
+            bar.addEventListener('click', () => {
+                hideCompleted = !hideCompleted;
+                renderTasks();
+            });
+            taskList.parentNode.insertBefore(bar, taskList.nextSibling);
+        }
+        if (count === 0) { bar.style.display = 'none'; return; }
+        bar.style.display = '';
+        bar.textContent = hideCompleted
+            ? 'Show ' + count + ' completed'
+            : 'Hide completed';
     }
 
     function toggleComplete(id) {
@@ -2183,6 +2259,29 @@
         if (!wasCompleted && t.recurrence && t.recurrence.type !== 'none') {
             const next = nextOccurrence(t);
             if (next) state.tasks.push(next);
+        }
+        saveState();
+        renderTasks();
+    }
+
+    // Soft-confirm delete (two-tap). Tap once to arm, tap again within 3s to delete.
+    function deleteTask(id) {
+        if (_deleteConfirmId !== id) {
+            _deleteConfirmId = id;
+            if (_deleteConfirmTimer) clearTimeout(_deleteConfirmTimer);
+            _deleteConfirmTimer = setTimeout(() => {
+                _deleteConfirmId = null;
+                renderTasks();
+            }, 3000);
+            renderTasks();
+            return;
+        }
+        // Second tap — actually delete
+        if (_deleteConfirmTimer) { clearTimeout(_deleteConfirmTimer); _deleteConfirmTimer = null; }
+        _deleteConfirmId = null;
+        state.tasks = state.tasks.filter(t => t.id !== id);
+        if (typeof lastQuickAddId !== 'undefined' && lastQuickAddId === id) {
+            hideQuickStartNudge();
         }
         saveState();
         renderTasks();
@@ -3443,6 +3542,31 @@
     btnDiscard.addEventListener('click', closeForm);
     btnSave.addEventListener('click', saveTask);
 
+    // Delete with in-place confirm
+    let _formDeleteTimer = null;
+    btnDelete.addEventListener('click', () => {
+        if (!editingId) return;
+        if (!btnDelete.classList.contains('confirm')) {
+            btnDelete.classList.add('confirm');
+            btnDelete.textContent = 'Tap again to confirm';
+            if (_formDeleteTimer) clearTimeout(_formDeleteTimer);
+            _formDeleteTimer = setTimeout(() => {
+                btnDelete.classList.remove('confirm');
+                btnDelete.textContent = 'Delete';
+            }, 3000);
+            return;
+        }
+        if (_formDeleteTimer) { clearTimeout(_formDeleteTimer); _formDeleteTimer = null; }
+        const id = editingId;
+        state.tasks = state.tasks.filter(t => t.id !== id);
+        if (typeof lastQuickAddId !== 'undefined' && lastQuickAddId === id) {
+            hideQuickStartNudge();
+        }
+        saveState();
+        closeForm();
+        renderTasks();
+    });
+
     // Quick add — instant task from single input
     let lastQuickAddId = null;
     let qsnHideTimer = null;
@@ -3507,6 +3631,45 @@
         if (typed) {
             document.getElementById('inputTitle').value = typed;
             quickInput.value = '';
+        }
+    });
+
+    // ════════════════════════════════════════════════════════════════
+    // KEYBOARD — Escape closes the topmost open surface
+    // ════════════════════════════════════════════════════════════════
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        // Priority order: start overlay > onboarding > inline form > side menu > distraction chips
+        const startOv = document.getElementById('startOverlay');
+        if (startOv && startOv.classList.contains('open')) {
+            closeStartOverlay();
+            e.preventDefault();
+            return;
+        }
+        const onb = document.getElementById('onboarding');
+        if (onb && onb.classList.contains('active')) {
+            // Only allow Escape if profile already exists (otherwise first-run is required)
+            if (state.profile) {
+                onb.classList.remove('active');
+                e.preventDefault();
+            }
+            return;
+        }
+        if (inlineForm && inlineForm.classList.contains('open')) {
+            closeForm();
+            e.preventDefault();
+            return;
+        }
+        if (sideMenu && sideMenu.classList.contains('open')) {
+            toggleMenu(false);
+            e.preventDefault();
+            return;
+        }
+        // Hide the quick-start nudge if visible
+        const nudge = document.getElementById('quickStartNudge');
+        if (nudge && nudge.style.display !== 'none') {
+            hideQuickStartNudge();
+            e.preventDefault();
         }
     });
 
