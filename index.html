@@ -616,13 +616,17 @@
         }
         .delay-nudge:empty { display: none; }
 
-        .reflection-panel {
+        .reflection-panel,
+        .extend-panel {
             max-width: 380px; margin: 0 auto 20px;
             background: #111916; border: 1.5px solid #1c2a1f;
             border-radius: 10px; padding: 20px;
             text-align: left;
         }
         .reflection-panel .chip-group { justify-content: flex-start; margin-bottom: 0; }
+        .extend-panel .check-list { margin-bottom: 14px; }
+        .extend-panel .check-item { padding: 8px 12px; }
+        .extend-panel .check-text { font-size: 13px; }
 
         /* ── ONBOARDING ── */
         .onboarding {
@@ -1195,9 +1199,20 @@
             <button class="btn-secondary" id="startStopBtn">Stop</button>
         </div>
 
-        <div class="start-button-row" id="startExtendButtons" style="display:none">
-            <button class="btn-big" id="startKeepGoingBtn">Keep going · 25 min</button>
-            <button class="btn-secondary" id="startDoneForNowBtn">Done for now</button>
+        <div class="extend-panel" id="extendPanel" style="display:none">
+            <div class="step-label" style="text-align:center; margin-bottom:10px; letter-spacing:0.08em;">How long will you keep going?</div>
+            <div class="chip-group" id="durationChips" style="justify-content:center; margin-bottom:18px">
+                <button type="button" class="chip" data-duration="5">5 min</button>
+                <button type="button" class="chip selected" data-duration="10">10 min</button>
+                <button type="button" class="chip" data-duration="25">25 min</button>
+                <button type="button" class="chip" data-duration="50">50 min</button>
+            </div>
+            <div class="step-label" style="margin-bottom:10px; letter-spacing:0.08em;">Distractions handled</div>
+            <ul class="check-list" id="extendChecklist" style="margin-bottom:14px;"></ul>
+            <div class="start-button-row">
+                <button class="btn-big" id="startKeepGoingBtn">Continue</button>
+                <button class="btn-secondary" id="startDoneForNowBtn">Done for now</button>
+            </div>
         </div>
 
         <div class="reflection-panel" id="reflectionPanel" style="display:none">
@@ -2225,7 +2240,7 @@
     function updateStartOvUi() {
         const show = id => document.getElementById(id).style.display = '';
         const hide = id => document.getElementById(id).style.display = 'none';
-        ['startMainButtons','startRunButtons','startExtendButtons','startCompleteButtons','delayPanel','reflectionPanel'].forEach(hide);
+        ['startMainButtons','startRunButtons','extendPanel','startCompleteButtons','delayPanel','reflectionPanel'].forEach(hide);
 
         const phase = startOv.phase;
         const label = document.getElementById('startPhaseLabel');
@@ -2243,10 +2258,12 @@
             show('startRunButtons');
         } else if (phase === 'extend') {
             label.textContent = 'Two minutes done';
-            sub.textContent   = 'Momentum beats motivation. Keep going?';
-            show('startExtendButtons');
+            sub.textContent   = 'You\'re in. Lock in the next block.';
+            renderExtendPanel();
+            show('extendPanel');
         } else if (phase === 'running25') {
-            label.textContent = 'Deep focus · 25 minutes';
+            const d = startOv.plannedDuration || 25;
+            label.textContent = 'Focus · ' + d + ' minutes';
             sub.textContent   = 'You\'re in it.';
             show('startRunButtons');
         } else if (phase === 'reflection') {
@@ -2269,7 +2286,7 @@
             clearInterval(startOv.timer); startOv.timer = null;
             if (startOv.phase === 'running2') { startOv.phase = 'extend'; updateStartOvUi(); }
             else if (startOv.phase === 'running25') {
-                startOv.pendingSessionMinutes = 27;
+                startOv.pendingSessionMinutes = startOv.plannedDuration || 25;
                 startOv.phase = 'reflection'; updateStartOvUi();
                 if ('Notification' in window && Notification.permission === 'granted') {
                     new Notification('Session complete', { body: 'Take a short break.' });
@@ -2277,6 +2294,46 @@
             }
         }
     }
+
+    // Extend panel — duration chips + checklist
+    const DISTRACTION_ACTIONS = {
+        'Phone':          'Phone out of reach',
+        'Social media':   'Social media tabs closed',
+        'Noise':          'Noise handled (headphones / quiet)',
+        'People':         'Interruptions handled',
+        'Other thoughts': 'Loose thoughts written down',
+    };
+
+    function buildDistractionChecklist() {
+        const items = [];
+        const d = (state.profile && state.profile.distraction) || '';
+        d.split(', ').filter(Boolean).forEach(label => {
+            items.push(DISTRACTION_ACTIONS[label] || (label + ' handled'));
+        });
+        if (!items.length) items.push('Phone out of reach', 'Workspace clear');
+        items.push('Notifications silenced');
+        return items;
+    }
+
+    function renderExtendPanel() {
+        const list = document.getElementById('extendChecklist');
+        list.innerHTML = '';
+        buildDistractionChecklist().forEach(txt => {
+            const li = document.createElement('li');
+            li.className = 'check-item';
+            li.innerHTML = '<div class="check-box">✓</div><div class="check-text">' + escapeHtml(txt) + '</div>';
+            li.addEventListener('click', () => li.classList.toggle('checked'));
+            list.appendChild(li);
+        });
+        document.querySelectorAll('#durationChips .chip').forEach(c =>
+            c.classList.toggle('selected', c.dataset.duration === '10'));
+    }
+
+    document.getElementById('durationChips').addEventListener('click', e => {
+        const chip = e.target.closest('.chip'); if (!chip) return;
+        e.currentTarget.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+        chip.classList.add('selected');
+    });
 
     // Wire up start overlay buttons
     document.getElementById('startClose').addEventListener('click', closeStartOverlay);
@@ -2300,7 +2357,8 @@
 
     document.getElementById('startStopBtn').addEventListener('click', () => {
         if (startOv.timer) { clearInterval(startOv.timer); startOv.timer = null; }
-        const minutesDone = startOv.phase === 'running2' ? 2 - Math.ceil(startOv.remaining/60) : 27 - Math.ceil(startOv.remaining/60);
+        const plannedTotal = startOv.phase === 'running2' ? 2 : (startOv.plannedDuration || 25);
+        const minutesDone = plannedTotal - Math.ceil(startOv.remaining/60);
         startOv.pendingSessionMinutes = Math.max(0, minutesDone);
         if (startOv.pendingSessionMinutes > 0) {
             startOv.phase = 'reflection';
@@ -2314,8 +2372,11 @@
         // Log the 2-min session that was just completed
         state.focusSessions.push({ taskId: startOv.taskId, minutes: 2, at: Date.now() });
         saveState();
+        const selected = document.querySelector('#durationChips .chip.selected');
+        const duration = selected ? parseInt(selected.dataset.duration) : 10;
+        startOv.plannedDuration = duration;
         startOv.phase = 'running25';
-        startOv.remaining = 25 * 60;
+        startOv.remaining = duration * 60;
         updateStartOvUi();
         updateStartOvTime();
         startOv.timer = setInterval(tickStartOv, 1000);
